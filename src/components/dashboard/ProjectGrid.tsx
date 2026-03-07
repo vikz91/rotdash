@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 const ACTIVITY_COLORS: Record<string, string> = {
   hot: "#22c55e",
   warm: "#eab308",
@@ -7,6 +9,8 @@ const ACTIVITY_COLORS: Record<string, string> = {
   cold: "#ef4444",
   glacier: "#64748b",
 };
+
+const PLACEHOLDER_IMAGE = "/placeholder-project.svg";
 
 export type Project = {
   id: string;
@@ -16,6 +20,7 @@ export type Project = {
   activityStatus: string;
   rotScore: number;
   healthStatus: string;
+  image?: string;
 };
 
 export default function ProjectGrid({ projects }: { projects: Project[] }) {
@@ -30,13 +35,34 @@ export default function ProjectGrid({ projects }: { projects: Project[] }) {
 
 function ProjectCard({ project }: { project: Project }) {
   const activityColor = ACTIVITY_COLORS[project.activityStatus] ?? "#64748b";
+  const [imageError, setImageError] = useState(false);
+  const showPlaceholder = !project.image || imageError;
 
   return (
     <button
       type="button"
-      className="bg-[#1f2933] border border-[#374151] rounded-lg p-4 text-left hover:border-[#4b5563] transition-colors"
+      className="bg-[#1f2933] border border-[#374151] rounded-lg overflow-hidden text-left hover:border-[#4b5563] transition-colors"
       onClick={() => {}}
     >
+      <div className="aspect-[2/1] bg-[#111827] relative">
+        {showPlaceholder ? (
+          <img
+            src={PLACEHOLDER_IMAGE}
+            alt=""
+            className="w-full h-full object-cover"
+            aria-hidden
+          />
+        ) : (
+          <img
+            src={project.image}
+            alt=""
+            className="w-full h-full object-cover"
+            aria-hidden
+            onError={() => setImageError(true)}
+          />
+        )}
+      </div>
+      <div className="p-4">
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-medium text-[#e5e7eb] truncate">{project.name}</h3>
         <span
@@ -65,6 +91,7 @@ function ProjectCard({ project }: { project: Project }) {
           <span className="font-mono">{project.rotScore}d</span>
           <span className="ml-1">{project.healthStatus}</span>
         </span>
+      </div>
       </div>
     </button>
   );
