@@ -1,27 +1,33 @@
 {
   "name": "rotdash",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "scripts": {
-    "dev": "bun --bun next dev --turbopack",
+    "dev": "bun --bun next dev",
     "build": "bun --bun next build",
-    "start": "bun --bun next start",
-    "lint": "next lint"
+    "start": "bun --bun .next/standalone/server.js",
+    "lint": "eslint .",
+    "docker:up": "docker rm -f rotdash-app 2>/dev/null; docker build -t rotdash . && docker run -d --name rotdash-app -p 3000:3000 -e MONGODB_URI=${MONGODB_URI:-mongodb://host.docker.internal:27017/rotdash} rotdash",
+    "docker:down": "docker rm -f rotdash-app 2>/dev/null || true"
   },
   "dependencies": {
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "next": "15.3.5"
+    "next": "16.1.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "recharts": "^3.8.0"
   },
   "devDependencies": {
     "typescript": "^5.9.3",
     "@types/node": "^20.19.37",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
     "@tailwindcss/postcss": "^4.2.1",
     "tailwindcss": "^4.2.1",
     "eslint": "^9.39.4",
-    "eslint-config-next": "15.3.5",
-    "@eslint/eslintrc": "^3.3.5"
+    "eslint-config-next": "16.1.6"
+  },
+  "overrides": {
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3"
   }
 }
