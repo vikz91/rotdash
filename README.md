@@ -3,7 +3,7 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Version](https://img.shields.io/badge/version-0.1.0-ff69b4.svg)](./package.json)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
-[![Bun](https://img.shields.io/badge/bun-powered-fbf0df.svg?logo=bun)](https://bun.sh)
+[![Bun](https://img.shields.io/badge/bun-1.3.10-fbf0df.svg?logo=bun)](https://bun.sh)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React-19-61dafb?logo=react)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript)](https://typescriptlang.org)
@@ -63,8 +63,8 @@ RotDash is **not** a project manager. It's a **project decay detector**. No Jira
 ### Prerequisites
 
 - Node.js 18+
-- [Bun](https://bun.sh) (or npm/yarn/pnpm)
-- Docker & Docker Compose (for local MongoDB — coming soon)
+- [Bun](https://bun.sh) 1.3.10 (see `.bumrc`)
+- Docker & Docker Compose (for local MongoDB and production image)
 
 ### Development
 
@@ -78,7 +78,25 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-> **Note:** MongoDB integration is in progress. Once Docker Compose is set up, you'll run `docker compose up -d` before starting the app.
+### Docker
+
+Build and run the production image (uses Bun 1.3.10 from `.bumrc`):
+
+```bash
+# Build
+docker build -t rotdash .
+
+# Run
+docker run -p 3000:3000 rotdash
+```
+
+For local MongoDB:
+
+```bash
+docker compose -f aux/docker-compose.yaml up -d
+```
+
+> **Note:** MongoDB integration is in progress. Once connected, run `docker compose -f aux/docker-compose.yaml up -d` before starting the app.
 
 ---
 
