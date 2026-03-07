@@ -1,5 +1,14 @@
 "use client";
 
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 export type ProjectFiltersState = {
   status: string;
   activityStatus: string;
@@ -7,15 +16,18 @@ export type ProjectFiltersState = {
   search: string;
 };
 
+const ALL_STATUS = "all";
+const ALL_ACTIVITY = "all";
+
 const STATUS_OPTIONS = [
-  { value: "", label: "All statuses" },
+  { value: ALL_STATUS, label: "All statuses" },
   { value: "idea", label: "Idea" },
   { value: "mvp", label: "MVP" },
   { value: "shipped", label: "Shipped" },
 ];
 
 const ACTIVITY_OPTIONS = [
-  { value: "", label: "All activity" },
+  { value: ALL_ACTIVITY, label: "All activity" },
   { value: "hot", label: "Hot" },
   { value: "warm", label: "Warm" },
   { value: "stale", label: "Stale" },
@@ -41,45 +53,51 @@ export default function ProjectFilters({ filters, onFiltersChange }: Props) {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row flex-wrap gap-3 mb-4">
-      <select
-        value={filters.status}
-        onChange={(e) => handleChange("status", e.target.value)}
-        className="bg-[#1f2933] border border-[#374151] rounded-lg px-3 py-2 text-sm text-[#e5e7eb] focus:outline-none focus:border-[#4b5563]"
-        aria-label="Filter by status"
+    <div className="mb-4 flex flex-col flex-wrap gap-3 sm:flex-row">
+      <Select
+        value={filters.status || ALL_STATUS}
+        onValueChange={(v) => handleChange("status", v === ALL_STATUS || !v ? "" : v)}
       >
-        {STATUS_OPTIONS.map((opt) => (
-          <option key={opt.value || "all"} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-      <select
-        value={filters.activityStatus}
-        onChange={(e) => handleChange("activityStatus", e.target.value)}
-        className="bg-[#1f2933] border border-[#374151] rounded-lg px-3 py-2 text-sm text-[#e5e7eb] focus:outline-none focus:border-[#4b5563]"
-        aria-label="Filter by activity status"
+        <SelectTrigger className="w-full min-w-[140px] sm:w-[160px]" aria-label="Filter by status">
+          <SelectValue placeholder="All statuses" />
+        </SelectTrigger>
+        <SelectContent>
+          {STATUS_OPTIONS.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select
+        value={filters.activityStatus || ALL_ACTIVITY}
+        onValueChange={(v) => handleChange("activityStatus", v === ALL_ACTIVITY || !v ? "" : v)}
       >
-        {ACTIVITY_OPTIONS.map((opt) => (
-          <option key={opt.value || "all"} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-      <input
+        <SelectTrigger className="w-full min-w-[140px] sm:w-[160px]" aria-label="Filter by activity status">
+          <SelectValue placeholder="All activity" />
+        </SelectTrigger>
+        <SelectContent>
+          {ACTIVITY_OPTIONS.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Input
         type="text"
         placeholder="Search by name..."
         value={filters.search}
         onChange={(e) => handleChange("search", e.target.value)}
-        className="bg-[#1f2933] border border-[#374151] rounded-lg px-3 py-2 text-sm text-[#e5e7eb] placeholder-[#6b7280] focus:outline-none focus:border-[#4b5563] min-w-[160px]"
+        className="min-w-[160px] sm:w-[180px]"
         aria-label="Search projects by name"
       />
-      <input
+      <Input
         type="text"
         placeholder="Filter by tag..."
         value={filters.tag}
         onChange={(e) => handleChange("tag", e.target.value)}
-        className="bg-[#1f2933] border border-[#374151] rounded-lg px-3 py-2 text-sm text-[#e5e7eb] placeholder-[#6b7280] focus:outline-none focus:border-[#4b5563] min-w-[140px]"
+        className="min-w-[140px] sm:w-[160px]"
         aria-label="Filter projects by tag"
       />
     </div>

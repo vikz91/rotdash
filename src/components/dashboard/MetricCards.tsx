@@ -1,24 +1,39 @@
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+
 type Metric = {
   label: string;
   value: number;
   accent?: string;
 };
 
-export default function MetricCards({ metrics }: { metrics: Metric[] }) {
+type MetricCardsProps = {
+  metrics: Metric[];
+  /** Stack in single column (e.g. when used in a narrow overview widget) */
+  stacked?: boolean;
+};
+
+export default function MetricCards({ metrics, stacked }: MetricCardsProps) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+    <div
+      className={cn(
+        "grid gap-3",
+        stacked ? "grid-cols-1" : "grid-cols-2 md:grid-cols-3",
+      )}
+    >
       {metrics.map((m) => (
-        <div
-          key={m.label}
-          className="bg-[#1f2933] border border-[#374151] rounded-lg p-4"
-        >
-          <p className="text-xs text-[#9ca3af] uppercase tracking-wider">
-            {m.label}
-          </p>
-          <p className={`text-2xl font-bold mt-1 ${m.accent ?? ""}`}>
-            {m.value}
-          </p>
-        </div>
+        <Card key={m.label} size="sm" className="bg-card">
+          <CardHeader className="pb-1">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">
+              {m.label}
+            </p>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <p className={cn("text-2xl font-bold", m.accent ?? "")}>
+              {m.value}
+            </p>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );

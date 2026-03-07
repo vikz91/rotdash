@@ -9,45 +9,50 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { Card, CardContent } from "@/components/ui/card";
 
 type ActivityDataPoint = { date: string; tasks: number };
 
 export default function ActivityChart({ data }: { data: ActivityDataPoint[] }) {
   return (
-    <div className="bg-[#1f2933] rounded-lg border border-[#374151] p-4 min-h-64 h-64">
+    <Card className="bg-card min-h-64 h-full">
+      <CardContent className="p-4 pt-4">
+      <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height={256}>
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis
             dataKey="date"
-            stroke="#9ca3af"
+            stroke="var(--muted-foreground)"
             tick={{ fontSize: 11 }}
             tickLine={false}
           />
           <YAxis
-            stroke="#9ca3af"
+            stroke="var(--muted-foreground)"
             tick={{ fontSize: 11 }}
             tickLine={false}
             axisLine={false}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#1f2933",
-              border: "1px solid #374151",
-              borderRadius: "6px",
+              backgroundColor: "var(--card)",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius)",
             }}
-            labelStyle={{ color: "#e5e7eb" }}
+            labelStyle={{ color: "var(--foreground)" }}
           />
           <Line
             type="monotone"
             dataKey="tasks"
-            stroke="#22c55e"
+            stroke="var(--chart-1)"
             strokeWidth={2}
-            dot={{ fill: "#22c55e", r: 3 }}
+            dot={{ fill: "var(--chart-1)", r: 3 }}
             name="Tasks"
           />
         </LineChart>
       </ResponsiveContainer>
-    </div>
+      </div>
+      </CardContent>
+    </Card>
   );
 }

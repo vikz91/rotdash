@@ -1,11 +1,27 @@
 export const MOCK_METRICS = {
   totalProjects: 25,
   hotProjects: 6,
+  warmProjects: 5,
+  staleProjects: 4,
   coldProjects: 4,
   glacierProjects: 6,
   totalTasks: 47,
   blockedTasks: 5,
 };
+
+export type ProjectActivityDistribution = {
+  name: string;
+  value: number;
+  color: string;
+};
+
+export const MOCK_ACTIVITY_DISTRIBUTION: ProjectActivityDistribution[] = [
+  { name: "Hot", value: MOCK_METRICS.hotProjects, color: "#34d399" },
+  { name: "Warm", value: MOCK_METRICS.warmProjects, color: "#fbbf24" },
+  { name: "Stale", value: MOCK_METRICS.staleProjects, color: "#fb923c" },
+  { name: "Cold", value: MOCK_METRICS.coldProjects, color: "#f87171" },
+  { name: "Glacier", value: MOCK_METRICS.glacierProjects, color: "#94a3b8" },
+];
 
 export const MOCK_ACTIVITY = Array.from({ length: 30 }, (_, i) => {
   const d = new Date();
@@ -26,6 +42,7 @@ export const MOCK_PROJECTS = [
     rotScore: 1,
     healthStatus: "+",
     image: "https://picsum.photos/seed/1/400/200",
+    nextTask: "Add Stripe checkout",
   },
   {
     id: "2",
@@ -35,6 +52,7 @@ export const MOCK_PROJECTS = [
     activityStatus: "warm" as const,
     rotScore: 4,
     healthStatus: "+",
+    nextTask: "Fix slash command handling",
   },
   {
     id: "3",
@@ -73,6 +91,7 @@ export const MOCK_PROJECTS = [
     activityStatus: "hot" as const,
     rotScore: 0,
     healthStatus: "+",
+    nextTask: "Add export to JSON",
   },
   {
     id: "7",
@@ -102,6 +121,7 @@ export const MOCK_PROJECTS = [
     rotScore: 2,
     healthStatus: "+",
     image: "https://picsum.photos/seed/9/400/200",
+    nextTask: "Connect Resend API",
   },
   {
     id: "10",

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import MetricCards from "@/components/dashboard/MetricCards";
+import ProjectActivityPie from "@/components/dashboard/ProjectActivityPie";
 import ActivityChart from "@/components/dashboard/ActivityChart";
 import ProjectGrid from "@/components/dashboard/ProjectGrid";
 import ProjectFilters, {
@@ -12,15 +13,17 @@ import ProjectPagination from "@/components/dashboard/ProjectPagination";
 import {
   MOCK_METRICS,
   MOCK_ACTIVITY,
+  MOCK_ACTIVITY_DISTRIBUTION,
   MOCK_PROJECTS,
 } from "@/lib/mock-data";
 import type { Project } from "@/components/dashboard/ProjectGrid";
+import Image from "next/image";
 
 const ITEMS_PER_PAGE = 20;
 
 function filterProjects(
   projects: Project[],
-  filters: ProjectFiltersState
+  filters: ProjectFiltersState,
 ): Project[] {
   return projects.filter((p) => {
     if (filters.status && p.status !== filters.status) return false;
@@ -49,13 +52,10 @@ export default function DashboardContent() {
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredAndSorted.length / ITEMS_PER_PAGE)
+    Math.ceil(filteredAndSorted.length / ITEMS_PER_PAGE),
   );
   const currentPage = Math.min(page, totalPages);
 
-  useEffect(() => {
-    if (page > totalPages) setPage(1);
-  }, [totalPages, page]);
   const paginatedProjects = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredAndSorted.slice(start, start + ITEMS_PER_PAGE);
@@ -68,13 +68,6 @@ export default function DashboardContent() {
 
   const metrics = [
     { label: "Total Projects", value: MOCK_METRICS.totalProjects },
-    { label: "Hot", value: MOCK_METRICS.hotProjects, accent: "text-[#22c55e]" },
-    { label: "Cold", value: MOCK_METRICS.coldProjects, accent: "text-[#ef4444]" },
-    {
-      label: "Glacier",
-      value: MOCK_METRICS.glacierProjects,
-      accent: "text-[#64748b]",
-    },
     { label: "Total Tasks", value: MOCK_METRICS.totalTasks },
     {
       label: "Blocked",
@@ -84,40 +77,58 @@ export default function DashboardContent() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-[#e5e7eb] p-6 md:p-8">
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">💀 RotDash</h1>
-        <p className="text-[#9ca3af] mt-1 text-sm">
-          See which of your projects are alive — and which are rotting.
-        </p>
-      </header>
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="mx-auto w-full max-w-[1920px] px-4 py-6 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 min-[2560px]:max-w-[2560px] min-[2560px]:px-20">
+        <header className="mb-8">
+          <Image
+            src={"/rotdash-logo.png"}
+            alt="RotDash Logo"
+            width={120}
+            height={120}
+          />
+          <p className="mt-1 text-sm text-muted-foreground">
+            See which of your projects are alive — and which are rotting.
+          </p>
+        </header>
 
-      <section className="mb-10">
-        <h2 className="text-sm font-medium text-[#9ca3af] uppercase tracking-wider mb-4">
-          Overview
-        </h2>
-        <MetricCards metrics={metrics} />
-      </section>
+        <section className="mb-10">
+          <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-muted-foreground">
+            Overview
+          </h2>
+          <div className="flex flex-wrap gap-3 items-stretch">
+            <div className="min-w-0 flex-[1_1_12rem] max-w-xs">
+              <MetricCards metrics={metrics} stacked />
+            </div>
+            <div className="min-w-0 flex-[1_1_14rem] max-w-sm">
+              <ProjectActivityPie data={MOCK_ACTIVITY_DISTRIBUTION} />
+            </div>
+            <div className="min-w-0 flex-[2_1_20rem] min-[800px]:flex-[3_1_28rem]">
+              <div className="h-full">
+                <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Tasks completed per day (last 30 days)
+                </p>
+                <ActivityChart data={MOCK_ACTIVITY} />
+              </div>
+            </div>
+          </div>
+        </section>
 
-      <section className="mb-10">
-        <h2 className="text-sm font-medium text-[#9ca3af] uppercase tracking-wider mb-4">
-          Tasks completed per day (last 30 days)
-        </h2>
-        <ActivityChart data={MOCK_ACTIVITY} />
-      </section>
-
-      <section>
-        <h2 className="text-sm font-medium text-[#9ca3af] uppercase tracking-wider mb-4">
-          Projects by rot score (worst first)
-        </h2>
-        <ProjectFilters filters={filters} onFiltersChange={handleFiltersChange} />
-        <ProjectGrid projects={paginatedProjects} />
-        <ProjectPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
-      </section>
+        <section>
+          <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-muted-foreground">
+            Projects by rot score (worst first)
+          </h2>
+          <ProjectFilters
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+          />
+          <ProjectGrid projects={paginatedProjects} />
+          <ProjectPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(p) => setPage(Math.max(1, Math.min(p, totalPages)))}
+          />
+        </section>
+      </div>
     </div>
   );
 }
