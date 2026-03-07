@@ -1,0 +1,36 @@
+---
+description: Vercel AI SDK & LLM best practices for Next.js
+globs: **/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Vercel AI SDK & LLM Best Practices
+
+When building AI features with Next.js and the Vercel AI SDK.
+
+## Core Patterns
+
+- **Server-side streaming**: Use `streamText` for chat, `streamObject` for structured JSON; prefer server over client
+- **`useChat`** for client chat UIs; **`useCompletion`** for text completion; favor Server Actions where possible
+- **`generateText()`** for text; **`generateObject()` / `streamObject()`** with Zod for structured output
+- Use **Server Actions** for AI features; implement progressive enhancement
+
+## Tool Calling
+
+- Enable `strict: true` when supported for schema validation
+- Include input examples to guide model structure
+- Set `needsApproval: true` for sensitive tools
+
+## Deployment (Vercel)
+
+- Serverless functions: **10s default max duration**; LLMs may exceed. Add `export const maxDuration = 30` (up to 60 on Hobby)
+- Store API keys in Vercel Environment Variables—never in client code
+- Implement **rate limiting**—LLM calls are expensive; protect from abuse
+- Consider Vercel Firewall for DDoS protection
+
+## Security & Quality
+
+- Authenticate and authorize AI endpoints like any API route
+- Cache AI responses when appropriate to reduce cost
+- Handle loading/error states; use `onFinish` callbacks for completion
+- Validate inputs with Zod; handle schema evolution gracefully

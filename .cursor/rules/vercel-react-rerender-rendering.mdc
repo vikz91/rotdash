@@ -1,0 +1,26 @@
+---
+description: Vercel React re-render and rendering performance patterns
+globs: **/*.tsx
+alwaysApply: false
+---
+
+# Vercel React Re-render & Rendering
+
+## Re-render Optimization
+
+- Use `useState(() => expensiveInit())` for lazy state initialization
+- Derive state during render, not in useEffect
+- Use `startTransition` for non-urgent updates
+- Use `useRef` for transient values that don't need re-renders
+- Put interaction logic in event handlers, not effects
+- Use functional `setState` for stable callbacks; hoist default non-primitive props for memo
+- Don't wrap simple primitive expressions in `useMemo`
+
+## Rendering Performance
+
+- Prefer `useTransition` over manual loading states
+- Use ternary for conditionals, not `&&` (avoids falsy number/string bugs)
+- Hoist static JSX outside components when possible
+- Use `content-visibility` for long lists
+- Reduce SVG coordinate precision; animate wrapper div, not SVG element
+- For hydration: use inline script for client-only data, or `suppressHydrationWarning` for expected mismatches

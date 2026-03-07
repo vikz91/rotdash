@@ -1,0 +1,19 @@
+---
+description: Follow project context and docs when generating code or answering questions
+alwaysApply: true
+---
+
+# Project Context
+
+**Before generating any code or answering project-related questions**, you MUST:
+
+1. Read `.cursor/context.md`
+2. Read these documentation files:
+   - `docs/ARCHITECTURE.md`
+   - `docs/BRANDS.md`
+   - `docs/FEATURES.md`
+   - `docs/INSTRUCTIONS.md`
+
+Treat these documents as authoritative. If a request conflicts with them, defer to the documentation.
+
+Do not implement features, patterns, or terminology not defined in the docs.

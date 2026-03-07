@@ -1,0 +1,16 @@
+---
+description: Vercel JavaScript micro-optimizations (loops, lookups, caching)
+globs: **/*.{ts,tsx,js,jsx}
+alwaysApply: false
+---
+
+# Vercel JavaScript Micro-Optimizations
+
+- **Set/Map**: Use for O(1) lookups instead of `array.find()` in loops
+- **Index maps**: Build `Map` for repeated lookups; avoid repeated linear scans
+- **Combine iterations**: Merge multiple `filter`/`map` passes into one loop
+- **Cache**: Hoist RegExp outside loops; cache `localStorage`/`sessionStorage` reads; cache function results in module-level Map
+- **Early exit**: Return early from functions; check array length before expensive comparisons
+- **Min/max**: Use loop instead of `sort()` for finding min/max
+- **Immutability**: Use `toSorted()` instead of `sort()` to avoid mutating
+- **DOM/CSS**: Batch CSS changes via classes or `cssText`; cache object properties in loops

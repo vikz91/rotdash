@@ -1,0 +1,39 @@
+---
+description: Vercel React & Next.js performance best practices (waterfalls, bundle, server)
+globs: **/*.{ts,tsx,js,jsx}
+alwaysApply: false
+---
+
+# Vercel React & Next.js Performance
+
+Reference when optimizing bundle size, refactoring, or implementing data fetching.
+Source: [vercel-labs/agent-skills/react-best-practices](https://github.com/vercel-labs/agent-skills)
+
+## CRITICAL: Eliminate Waterfalls
+
+- Move `await` into branches where actually needed—don't block early-return paths
+- Use `Promise.all()` for independent async operations
+- In API routes: start promises immediately, await late; avoid sequential chains
+- Use Suspense boundaries for streaming—don't block entire page for one component
+
+```ts
+// ❌ BAD: sequential
+const a = await fetchA(); const b = await fetchB();
+// ✅ GOOD: parallel
+const [a, b] = await Promise.all([fetchA(), fetchB()]);
+```
+
+## CRITICAL: Bundle Size
+
+- Import directly from source; avoid barrel imports (`import X from 'lib/Button'` not `import { Button } from 'lib'`)
+- Use `next/dynamic` for heavy components; defer analytics/3rd-party after hydration
+- Preload on hover/focus for perceived speed
+- Use `optimizePackageImports` in next.config for `lucide-react`, `@mui/material`
+
+## Server-Side
+
+- Authenticate inside every Server Action—treat like API routes
+- Use `React.cache()` for per-request deduplication; LRU cache for cross-request
+- Minimize data passed to client—only serialize fields the client uses
+- Parallelize RSC fetches via component composition (sibling async components)
+- Avoid duplicate serialization: don't pass `users` and `users.filter(...)`; filter on client
