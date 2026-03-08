@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
@@ -9,6 +9,7 @@ import {
   createDefaultPayload,
   type ProjectCreatePayload,
 } from "@/lib/project-schema";
+import { createProject } from "@/lib/api/client";
 import IdentityStep from "./wizard-steps/IdentityStep";
 import ResourcesStep from "./wizard-steps/ResourcesStep";
 import HealthStep from "./wizard-steps/HealthStep";
@@ -29,7 +30,8 @@ export default function CreateProjectWizard() {
   const [step, setStep] = useState(1);
   const [nameError, setNameError] = useState<string | undefined>();
   const [isSuccess, setIsSuccess] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const router = useRouter();
 
   const updatePayload = (updates: Partial<ProjectCreatePayload>) => {
@@ -58,23 +60,26 @@ export default function CreateProjectWizard() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!payload.name.trim()) {
       setNameError("Name is required");
       setStep(1);
       return;
     }
 
-    startTransition(() => {
-      // Mock submit — replace with real API call later
-      console.log("POST /api/projects", payload);
-
+    setIsPending(true);
+    setSubmitError(null);
+    try {
+      await createProject(payload);
       setIsSuccess(true);
-
       setTimeout(() => {
         router.push("/");
       }, 1500);
-    });
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : "Failed to create project");
+    } finally {
+      setIsPending(false);
+    }
   };
 
   if (isSuccess) {
@@ -145,6 +150,7 @@ export default function CreateProjectWizard() {
             payload={payload}
             isSubmitting={isPending}
             onSubmit={handleSubmit}
+            error={submitError}
           />
         )}
       </div>

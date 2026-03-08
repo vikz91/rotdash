@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import StatsNavbar from "@/components/dashboard/StatsNavbar";
 import ProjectGrid from "@/components/dashboard/ProjectGrid";
@@ -12,61 +12,96 @@ import ProjectFilters, {
 import ProjectPagination from "@/components/dashboard/ProjectPagination";
 import ProjectModal from "@/components/project/ProjectModal";
 import {
-  MOCK_METRICS,
-  MOCK_ACTIVITY,
-  MOCK_PROJECTS,
-  MOCK_TASKS,
-} from "@/lib/mock-data";
+  getProjects,
+  getDashboardStats,
+  getProjectTasks,
+  updateProject,
+  createTask,
+  updateTask,
+  deleteTask,
+} from "@/lib/api/client";
 import type { Project } from "@/lib/project-schema";
 import type { Task } from "@/lib/task-schema";
+import type { StatsNavbarMetrics, ActivityDataPoint } from "@/lib/types";
 
 const ITEMS_PER_PAGE = 20;
-
-const PROJECT_TYPE_TAGS: Record<string, string[]> = {
-  tool: ["tool"],
-  devops: ["devops"],
-  webdev: ["website", "webdev", "react"],
-  backend: ["backend", "api"],
-  "side-project": ["side-project"],
-};
-
-function filterProjects(
-  projects: Project[],
-  filters: ProjectFiltersState,
-): Project[] {
-  return projects.filter((p) => {
-    if (filters.status && p.status !== filters.status) return false;
-    if (filters.activityStatus && p.activityStatus !== filters.activityStatus)
-      return false;
-    if (filters.projectType) {
-      const allowedTags =
-        PROJECT_TYPE_TAGS[filters.projectType] ?? [filters.projectType];
-      const tagSet = new Set(p.tags.map((t) => t.toLowerCase()));
-      if (!allowedTags.some((t) => tagSet.has(t.toLowerCase()))) return false;
-    }
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      if (!p.name.toLowerCase().includes(searchLower)) return false;
-    }
-    return true;
-  });
-}
 
 export default function DashboardContent() {
   const router = useRouter();
   const [filters, setFilters] = useState<ProjectFiltersState>(DEFAULT_FILTERS);
   const [page, setPage] = useState(1);
+  const [stats, setStats] = useState<{
+    metrics: StatsNavbarMetrics;
+    activity: ActivityDataPoint[];
+  } | null>(null);
+  const [projectsRes, setProjectsRes] = useState<{
+    projects: Project[];
+    total: number;
+  } | null>(null);
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [modalProject, setModalProject] = useState<Project | null>(null);
   const [modalTasks, setModalTasks] = useState<Task[]>([]);
+  const [saving, setSaving] = useState(false);
 
-  const handleProjectClick = useCallback((project: Project) => {
-    const fullProject = MOCK_PROJECTS.find((p) => p.id === project.id) ?? project;
-    setSelectedProject(fullProject as Project);
-    setModalProject(fullProject as Project);
-    setModalTasks(
-      MOCK_TASKS.filter((t) => t.projectId === project.id).map((t) => ({ ...t })),
-    );
+  const loadStats = useCallback(async () => {
+    try {
+      const data = await getDashboardStats();
+      setStats(data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load stats");
+    }
+  }, []);
+
+  const loadProjects = useCallback(async () => {
+    try {
+      const projectType = filters.projectType || undefined;
+      const status = filters.status || undefined;
+      const activityStatus = filters.activityStatus || undefined;
+      const search = filters.search || undefined;
+
+      const [projectsData, topSectionData] = await Promise.all([
+        getProjects({
+          page,
+          limit: ITEMS_PER_PAGE,
+          projectType,
+          status,
+          activityStatus,
+          search,
+        }),
+        getProjects({ page: 1, limit: 1000 }),
+      ]);
+
+      setProjectsRes(projectsData);
+      setAllProjects(topSectionData.projects);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load projects");
+    }
+  }, [page, filters.projectType, filters.status, filters.activityStatus, filters.search]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    Promise.all([loadStats(), loadProjects()]).finally(() => {
+      if (!cancelled) setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [loadStats, loadProjects]);
+
+  const handleProjectClick = useCallback(async (project: Project) => {
+    setSelectedProject(project);
+    setModalProject(project);
+    try {
+      const tasks = await getProjectTasks(project.id);
+      setModalTasks(tasks);
+    } catch {
+      setModalTasks([]);
+    }
   }, []);
 
   const handleModalOpenChange = useCallback((open: boolean) => {
@@ -77,61 +112,126 @@ export default function DashboardContent() {
     }
   }, []);
 
-  const handleProjectUpdate = useCallback((updates: Partial<Project>) => {
-    setModalProject((prev) => (prev ? { ...prev, ...updates } : null));
-  }, []);
+  const handleProjectUpdate = useCallback(
+    async (updates: Partial<Project>) => {
+      if (!modalProject || saving) return;
+      setSaving(true);
+      try {
+        const updated = await updateProject(modalProject.id, updates);
+        setModalProject(updated);
+        await loadProjects();
+        await loadStats();
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to update project");
+      } finally {
+        setSaving(false);
+      }
+    },
+    [modalProject, saving, loadProjects, loadStats]
+  );
 
-  const handleTaskUpdate = useCallback((taskId: string, updates: Partial<Task>) => {
-    setModalTasks((prev) =>
-      prev.map((t) => (t.id === taskId ? { ...t, ...updates } : t)),
-    );
-  }, []);
+  const handleTaskUpdate = useCallback(
+    async (taskId: string, updates: Partial<Task>) => {
+      if (saving) return;
+      setSaving(true);
+      try {
+        const updated = await updateTask(taskId, updates);
+        setModalTasks((prev) =>
+          prev.map((t) => (t.id === taskId ? updated : t))
+        );
+        await loadStats();
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to update task");
+      } finally {
+        setSaving(false);
+      }
+    },
+    [saving, loadStats]
+  );
 
   const handleTaskAdd = useCallback(
-    (task: Omit<Task, "id">) => {
-      const newTask: Task = {
-        ...task,
-        id: `task-${Date.now()}`,
-      };
-      setModalTasks((prev) => [...prev, newTask]);
+    async (task: Omit<Task, "id">) => {
+      if (!modalProject || saving) return;
+      setSaving(true);
+      try {
+        const newTask = await createTask(task);
+        setModalTasks((prev) => [...prev, newTask]);
+        await loadStats();
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to add task");
+      } finally {
+        setSaving(false);
+      }
     },
-    [],
+    [modalProject, saving, loadStats]
   );
 
-  const handleTaskDelete = useCallback((taskId: string) => {
-    setModalTasks((prev) => prev.filter((t) => t.id !== taskId));
-  }, []);
-
-  const filteredAndSorted = useMemo(() => {
-    const filtered = filterProjects(MOCK_PROJECTS as Project[], filters);
-    return [...filtered].sort((a, b) => b.rotScore - a.rotScore);
-  }, [filters]);
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredAndSorted.length / ITEMS_PER_PAGE),
+  const handleTaskDelete = useCallback(
+    async (taskId: string) => {
+      if (saving) return;
+      setSaving(true);
+      try {
+        await deleteTask(taskId);
+        setModalTasks((prev) => prev.filter((t) => t.id !== taskId));
+        await loadStats();
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to delete task");
+      } finally {
+        setSaving(false);
+      }
+    },
+    [saving, loadStats]
   );
-  const currentPage = Math.min(page, totalPages);
-
-  const paginatedProjects = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredAndSorted.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredAndSorted, currentPage]);
 
   const handleFiltersChange = (newFilters: ProjectFiltersState) => {
     setFilters(newFilters);
     setPage(1);
   };
 
+  const totalPages = projectsRes
+    ? Math.max(1, Math.ceil(projectsRes.total / ITEMS_PER_PAGE))
+    : 1;
+  const currentPage = Math.min(page, totalPages);
+
+  if (loading && !stats) {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
+        Loading…
+      </div>
+    );
+  }
+
+  if (error && !stats) {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-destructive">
+        {error}
+      </div>
+    );
+  }
+
+  const metrics = stats?.metrics ?? {
+    totalProjects: 0,
+    hotProjects: 0,
+    warmProjects: 0,
+    staleProjects: 0,
+    coldProjects: 0,
+    glacierProjects: 0,
+    totalTasks: 0,
+    blockedTasks: 0,
+    lastActivity: "never",
+  };
+  const activityData = stats?.activity ?? [];
+  const paginatedProjects = projectsRes?.projects ?? [];
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <StatsNavbar
-        metrics={MOCK_METRICS}
-        activityData={MOCK_ACTIVITY}
+        metrics={metrics}
+        activityData={activityData}
         onCreateProject={() => router.push("/projects/new")}
       />
       <div className="mx-auto w-full max-w-[1920px] px-4 py-6 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 min-[2560px]:max-w-[2560px] min-[2560px]:px-20">
-        <DashboardTopSection projects={MOCK_PROJECTS as Project[]} />
+        <DashboardTopSection projects={allProjects} />
         <section>
           <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Projects by rot score (worst first)
@@ -162,6 +262,7 @@ export default function DashboardContent() {
           onTaskUpdate={handleTaskUpdate}
           onTaskAdd={handleTaskAdd}
           onTaskDelete={handleTaskDelete}
+          isSaving={saving}
         />
       )}
     </div>

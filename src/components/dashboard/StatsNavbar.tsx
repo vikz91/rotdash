@@ -22,19 +22,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export type StatsNavbarMetrics = {
-  totalProjects: number;
-  hotProjects: number;
-  warmProjects: number;
-  staleProjects: number;
-  coldProjects: number;
-  glacierProjects: number;
-  totalTasks: number;
-  blockedTasks: number;
-  lastActivity: string;
-};
+import type { StatsNavbarMetrics, ActivityDataPoint } from "@/lib/types";
 
-export type ActivityDataPoint = { date: string; tasks: number };
+export type { StatsNavbarMetrics, ActivityDataPoint };
 
 type TooltipContent = {
   /** Natural sentence with {value} placeholder. e.g. "{value} projects are hot — actively worked on." */

@@ -11,6 +11,7 @@ type Props = {
   payload: ProjectCreatePayload;
   isSubmitting: boolean;
   onSubmit: () => void;
+  error?: string | null;
 };
 
 function Field({
@@ -32,7 +33,7 @@ function Field({
   );
 }
 
-export default function ReviewStep({ payload, isSubmitting, onSubmit }: Props) {
+export default function ReviewStep({ payload, isSubmitting, onSubmit, error }: Props) {
   const statusLabel =
     PROJECT_STATUS_OPTIONS.find((o) => o.value === payload.status)?.label ?? payload.status;
   const healthLabel =
@@ -69,6 +70,9 @@ export default function ReviewStep({ payload, isSubmitting, onSubmit }: Props) {
           ) : null}
         </div>
 
+        {error ? (
+          <p className="text-sm text-destructive">{error}</p>
+        ) : null}
         <Button
           type="button"
           size="lg"

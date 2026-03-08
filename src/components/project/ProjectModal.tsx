@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -44,6 +44,7 @@ type ProjectModalProps = {
   onTaskUpdate: (taskId: string, updates: Partial<Task>) => void;
   onTaskAdd: (task: Omit<Task, "id">) => void;
   onTaskDelete: (taskId: string) => void;
+  isSaving?: boolean;
 };
 
 export default function ProjectModal({
@@ -55,6 +56,7 @@ export default function ProjectModal({
   onTaskUpdate,
   onTaskAdd,
   onTaskDelete,
+  isSaving = false,
 }: ProjectModalProps) {
   const [editingTaskDescId, setEditingTaskDescId] = useState<string | null>(
     null,
@@ -77,14 +79,16 @@ export default function ProjectModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="sm:max-w-3xl max-h-[90vh] overflow-y-auto gap-0"
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        className="min-w-[50vw] sm:max-w-none w-1/2 gap-0 flex flex-col p-0"
         showCloseButton
       >
-        <DialogHeader className="pb-4">
-          <DialogTitle className="text-lg">Project details</DialogTitle>
-        </DialogHeader>
+        <SheetHeader className="pb-4 pt-6 px-6 border-b border-slate-700/60 shrink-0">
+          <SheetTitle className="text-lg">Project details</SheetTitle>
+        </SheetHeader>
+        <div className="flex-1 overflow-y-auto px-6 py-6">
 
         <div className="space-y-6">
           {/* Project info */}
@@ -368,7 +372,8 @@ export default function ProjectModal({
             </div>
           </section>
         </div>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
