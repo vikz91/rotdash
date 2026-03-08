@@ -8,12 +8,12 @@
 ## 2. Mock project view
 - id: 2
 - description: Project modal opened when clicking a project card. Shows project info (name, description, tags, status, healthStatus, links) and tasks table. Inline editing.
-- status: todo
+- status: done
 
 ## 3. Mock create project page
 - id: 3
 - description: Form/flow to create a new project with required and optional fields (name, description, tags, status, links). Uses mock submit.
-- status: todo
+- status: done
 
 ## 4. Integrate toasts
 - id: 4

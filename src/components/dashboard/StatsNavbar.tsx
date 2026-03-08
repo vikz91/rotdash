@@ -163,8 +163,8 @@ export default function StatsNavbar({
   return (
     <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
       <div className="mx-auto w-full max-w-[1920px] px-1 py-3 sm:px-2 md:px-2 lg:px-2 xl:px-4 2xl:px-4 min-[2560px]:max-w-[2560px] min-[2560px]:px-20">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-x-4 sm:gap-x-6 gap-y-2">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center gap-x-4 sm:gap-x-6 gap-y-2 shrink-0">
             <Image
               src="/rotdash-logo.png"
               alt="RotDash Logo"
@@ -253,59 +253,61 @@ export default function StatsNavbar({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="hidden sm:flex flex-1 min-w-[120px]">
             <Tooltip>
-              <TooltipTrigger>
-                <span className="hidden sm:flex w-24 lg:w-32 h-8 rounded-md overflow-hidden bg-muted/30 cursor-default shrink-0">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={activityData}
-                      margin={{ top: 2, right: 2, bottom: 2, left: 2 }}
-                    >
-                      <Line
-                        type="monotone"
-                        dataKey="tasks"
-                        stroke="var(--chart-1)"
-                        strokeWidth={1.5}
-                        dot={false}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent
-                side="bottom"
-                className="min-w-[220px] max-w-[260px] p-0 flex flex-col overflow-hidden"
+              <TooltipTrigger
+                render={
+                  <div className="block w-full min-h-8 h-8 rounded-md overflow-hidden bg-muted/30 cursor-default" />
+                }
               >
-                <div className="flex items-center gap-2 px-3 pt-3 pb-2">
-                  <TrendingUp
-                    className="size-4 shrink-0 text-[var(--chart-1)]"
-                    aria-hidden
-                  />
-                  <span className="font-semibold text-sm text-background">
-                    Activity trend
-                  </span>
-                </div>
-                <p className="px-3 pb-3 text-xs text-background/90 leading-relaxed">
-                  Tasks completed per day across your projects over the last 30
-                  days. Higher bars indicate more active periods.
-                </p>
-                <footer className="border-t border-background/20 px-3 py-2">
-                  <p className="text-[10px] text-background/70">
-                    Scroll down for the full chart and project details.
-                  </p>
-                </footer>
-              </TooltipContent>
-            </Tooltip>
-            <Button
-              size="lg"
-              onClick={onCreateProject}
-              className="gap-1.5 cursor-pointer"
+                <ResponsiveContainer width="100%" height={32}>
+                  <LineChart
+                    data={activityData}
+                    margin={{ top: 2, right: 2, bottom: 2, left: 2 }}
+                  >
+                    <Line
+                      type="monotone"
+                      dataKey="tasks"
+                      stroke="var(--chart-1)"
+                      strokeWidth={1.5}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+            </TooltipTrigger>
+            <TooltipContent
+              side="bottom"
+              className="min-w-[220px] max-w-[260px] p-0 flex flex-col overflow-hidden"
             >
-              <Plus className="size-3.5" />
-              New Project
-            </Button>
+              <div className="flex items-center gap-2 px-3 pt-3 pb-2">
+                <TrendingUp
+                  className="size-4 shrink-0 text-[var(--chart-1)]"
+                  aria-hidden
+                />
+                <span className="font-semibold text-sm text-background">
+                  Activity trend
+                </span>
+              </div>
+              <p className="px-3 pb-3 text-xs text-background/90 leading-relaxed">
+                Tasks completed per day across your projects over the last 30
+                days. Higher bars indicate more active periods.
+              </p>
+              <footer className="border-t border-background/20 px-3 py-2">
+                <p className="text-[10px] text-background/70">
+                  Scroll down for the full chart and project details.
+                </p>
+              </footer>
+            </TooltipContent>
+          </Tooltip>
           </div>
+          <Button
+            size="lg"
+            onClick={onCreateProject}
+            className="gap-1.5 cursor-pointer shrink-0"
+          >
+            <Plus className="size-3.5" />
+            New Project
+          </Button>
         </div>
       </div>
     </nav>
