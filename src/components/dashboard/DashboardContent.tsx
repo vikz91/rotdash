@@ -60,6 +60,7 @@ export default function DashboardContent() {
       const projectType = filters.projectType || undefined;
       const status = filters.status || undefined;
       const activityStatus = filters.activityStatus || undefined;
+      const hasTasks = filters.hasTasks || undefined;
       const search = filters.search || undefined;
 
       const [projectsData, topSectionData] = await Promise.all([
@@ -69,6 +70,7 @@ export default function DashboardContent() {
           projectType,
           status,
           activityStatus,
+          hasTasks,
           search,
         }),
         getProjects({ page: 1, limit: 1000 }),
@@ -80,7 +82,7 @@ export default function DashboardContent() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load projects");
     }
-  }, [page, filters.projectType, filters.status, filters.activityStatus, filters.search]);
+  }, [page, filters.projectType, filters.status, filters.activityStatus, filters.hasTasks, filters.search]);
 
   useEffect(() => {
     let cancelled = false;
@@ -231,7 +233,10 @@ export default function DashboardContent() {
         onCreateProject={() => router.push("/projects/new")}
       />
       <div className="mx-auto w-full max-w-[1920px] px-4 py-6 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 min-[2560px]:max-w-[2560px] min-[2560px]:px-20">
-        <DashboardTopSection projects={allProjects} />
+        <DashboardTopSection
+          projects={allProjects}
+          onProjectClick={handleProjectClick}
+        />
         <section>
           <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Projects by rot score (worst first)

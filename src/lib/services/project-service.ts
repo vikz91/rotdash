@@ -31,6 +31,8 @@ export type ProjectListParams = {
   tag?: string;
   projectType?: string;
   search?: string;
+  /** "no-tasks" | "with-tasks" */
+  hasTasks?: string;
 };
 
 function toApiProject(store: StoreProject, nextTask?: string): Project {
@@ -65,7 +67,16 @@ export function listProjects(params: ProjectListParams = {}): {
   projects: Project[];
   total: number;
 } {
-  const { page = 1, limit = 20, status, activityStatus, tag, projectType, search } = params;
+  const { page = 1, limit = 20, status, activityStatus, tag, projectType, search, hasTasks } = params;
+
+  const tasks = getTasksRaw().filter((t) => !t.deletedStatus);
+  const taskCountByProject = tasks.reduce<Record<string, number>>(
+    (acc, t) => {
+      acc[t.projectId] = (acc[t.projectId] ?? 0) + 1;
+      return acc;
+    },
+    {}
+  );
 
   let list = getProjectsRaw().filter((p) => !p.deletedStatus);
 
@@ -91,6 +102,11 @@ export function listProjects(params: ProjectListParams = {}): {
   if (search) {
     const searchLower = search.toLowerCase();
     list = list.filter((p) => p.name.toLowerCase().includes(searchLower));
+  }
+  if (hasTasks === "no-tasks") {
+    list = list.filter((p) => (taskCountByProject[p.id] ?? 0) === 0);
+  } else if (hasTasks === "with-tasks") {
+    list = list.filter((p) => (taskCountByProject[p.id] ?? 0) > 0);
   }
 
   list.sort((a, b) => {

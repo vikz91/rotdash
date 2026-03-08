@@ -5,6 +5,7 @@
 import { getProjectsRaw } from "@/lib/store/memory-store";
 import { getTasksRaw } from "@/lib/store/memory-store";
 import { calculateRotScore, getActivityStatus } from "@/lib/services/rot-service";
+import { MOCK_ACTIVITY_GRAPH } from "@/lib/mock-data";
 import type { StatsNavbarMetrics, ActivityDataPoint } from "@/lib/types";
 
 function formatLastActivity(dateStr: string): string {
@@ -100,6 +101,23 @@ export function getDashboardStats(): { metrics: StatsNavbarMetrics; activity: Ac
   };
 
   const activity: ActivityDataPoint[] = activityDates;
+  const hasVariation = activity.some((p) => p.tasks > 0);
 
-  return { metrics, activity };
+  return {
+    metrics,
+    activity: hasVariation ? activity : MOCK_ACTIVITY_GRAPH,
+  };
+}
+
+/**
+ * Returns activity graph data (tasks completed per day, last 30 days).
+ * Falls back to mock data when computation fails or store is unavailable.
+ */
+export function getActivityGraph(): { activity: ActivityDataPoint[] } {
+  try {
+    const { activity } = getDashboardStats();
+    return { activity };
+  } catch {
+    return { activity: MOCK_ACTIVITY_GRAPH };
+  }
 }

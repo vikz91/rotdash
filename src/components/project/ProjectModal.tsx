@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Scrollable } from "@/components/ui/scrollable";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
@@ -88,8 +89,7 @@ export default function ProjectModal({
         <SheetHeader className="pb-4 pt-6 px-6 border-b border-slate-700/60 shrink-0">
           <SheetTitle className="text-lg">Project details</SheetTitle>
         </SheetHeader>
-        <div className="flex-1 overflow-y-auto px-6 py-6">
-
+        <Scrollable className="flex-1 px-6 py-6">
         <div className="space-y-6">
           {/* Project info */}
           <section className="space-y-4">
@@ -372,7 +372,7 @@ export default function ProjectModal({
             </div>
           </section>
         </div>
-        </div>
+        </Scrollable>
       </SheetContent>
     </Sheet>
   );

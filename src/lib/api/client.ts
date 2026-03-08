@@ -2,10 +2,17 @@
  * API client for frontend. Calls API routes; throws on non-2xx.
  */
 
+import type { Idea } from "@/lib/idea-schema";
+import type { IdeaCreatePayload } from "@/lib/idea-schema";
 import type { Project } from "@/lib/project-schema";
 import type { ProjectCreatePayload } from "@/lib/project-schema";
 import type { Task } from "@/lib/task-schema";
-import type { StatsNavbarMetrics, ActivityDataPoint } from "@/lib/types";
+import type {
+  StatsNavbarMetrics,
+  ActivityDataPoint,
+  DashboardStatsResponse,
+  ActivityGraphResponse,
+} from "@/lib/types";
 
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, {
@@ -30,6 +37,7 @@ export type GetProjectsParams = {
   tag?: string;
   projectType?: string;
   search?: string;
+  hasTasks?: string;
 };
 
 export type GetProjectsResponse = {
@@ -46,6 +54,7 @@ export async function getProjects(params: GetProjectsParams = {}): Promise<GetPr
   if (params.tag) sp.set("tag", params.tag);
   if (params.projectType) sp.set("projectType", params.projectType);
   if (params.search) sp.set("search", params.search);
+  if (params.hasTasks) sp.set("hasTasks", params.hasTasks);
   const qs = sp.toString();
   const url = `/api/projects${qs ? `?${qs}` : ""}`;
   return fetchJson<GetProjectsResponse>(url);
@@ -99,11 +108,36 @@ export async function deleteTask(id: string): Promise<void> {
   });
 }
 
-export type DashboardStatsResponse = {
-  metrics: StatsNavbarMetrics;
-  activity: ActivityDataPoint[];
-};
+export async function getIdeas(): Promise<Idea[]> {
+  return fetchJson<Idea[]>("/api/ideas");
+}
+
+export async function createIdea(payload: IdeaCreatePayload): Promise<Idea> {
+  return fetchJson<Idea>("/api/ideas", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateIdea(id: string, payload: Partial<Pick<Idea, "text">>): Promise<Idea> {
+  return fetchJson<Idea>(`/api/ideas/${encodeURIComponent(id)}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteIdea(id: string): Promise<void> {
+  await fetchJson(`/api/ideas/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+}
+
+export type { DashboardStatsResponse, ActivityGraphResponse };
 
 export async function getDashboardStats(): Promise<DashboardStatsResponse> {
   return fetchJson<DashboardStatsResponse>("/api/dashboard/stats");
+}
+
+export async function getActivityGraph(): Promise<ActivityGraphResponse> {
+  return fetchJson<ActivityGraphResponse>("/api/dashboard/activity");
 }

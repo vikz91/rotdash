@@ -54,7 +54,8 @@ export default function MostRottingProjects({ projects }: MostRottingProjectsPro
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <span className="font-mono text-sm tabular-nums text-muted-foreground">
-                  {project.rotScore}d
+                  {project.rotScore} day
+                  {project.rotScore === 1 ? "" : "s"} inactive
                 </span>
                 <span
                   className={`h-2 w-2 shrink-0 rounded-full ${colors.bar}`}
@@ -67,11 +68,17 @@ export default function MostRottingProjects({ projects }: MostRottingProjectsPro
       </ul>
       <div className="mt-5 pt-4 border-t border-slate-700/40">
         <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          Project Health
+          Rot Index
+        </p>
+        <p className="mb-2 text-2xl font-semibold tabular-nums text-foreground">
+          {healthPercent}%
+        </p>
+        <p className="mb-3 text-xs text-muted-foreground">
+          {healthPercent}% of projects are stale, cold, or glacier
         </p>
         <div className="h-2 w-full overflow-hidden rounded-full bg-slate-700/60">
           <div
-            className={`h-full rounded-full bg-amber-500/80 transition-all`}
+            className="h-full rounded-full bg-amber-500/80 transition-all"
             style={{ width: `${healthPercent}%` }}
             role="progressbar"
             aria-valuenow={healthPercent}

@@ -3,8 +3,7 @@
  * subsequent reads reflect changes. Used by API routes until DB is connected.
  */
 
-import { MOCK_PROJECTS } from "@/lib/mock-data";
-import { MOCK_TASKS } from "@/lib/mock-data";
+import { MOCK_IDEAS, MOCK_PROJECTS, MOCK_TASKS } from "@/lib/mock-data";
 import type { Task } from "@/lib/task-schema";
 
 type ActivityStatus = "hot" | "warm" | "stale" | "cold" | "glacier";
@@ -30,6 +29,13 @@ export type StoreProject = {
 export type StoreTask = Task & {
   createdAt: string;
   updatedAt: string;
+  deletedStatus: boolean;
+};
+
+export type StoreIdea = {
+  id: string;
+  text: string;
+  createdAt: string;
   deletedStatus: boolean;
 };
 
@@ -85,8 +91,18 @@ function seedTasks(): StoreTask[] {
   }));
 }
 
+function seedIdeas(): StoreIdea[] {
+  return MOCK_IDEAS.map((i) => ({
+    id: i.id,
+    text: i.text,
+    createdAt: i.createdAt,
+    deletedStatus: false,
+  }));
+}
+
 const projects: StoreProject[] = seedProjects();
 const tasks: StoreTask[] = seedTasks();
+const ideas: StoreIdea[] = seedIdeas();
 
 export function getProjectsRaw(): StoreProject[] {
   return projects;
@@ -170,5 +186,36 @@ export function deleteTask(id: string): boolean {
   if (idx === -1) return false;
   tasks[idx].deletedStatus = true;
   tasks[idx].updatedAt = toIsoDate(new Date());
+  return true;
+}
+
+export function getIdeasRaw(): StoreIdea[] {
+  return ideas;
+}
+
+export function getIdeaById(id: string): StoreIdea | undefined {
+  return ideas.find((i) => i.id === id && !i.deletedStatus);
+}
+
+export function createIdea(data: Omit<StoreIdea, "deletedStatus">): StoreIdea {
+  const idea: StoreIdea = {
+    ...data,
+    deletedStatus: false,
+  };
+  ideas.push(idea);
+  return idea;
+}
+
+export function updateIdea(id: string, updates: Partial<Pick<StoreIdea, "text">>): StoreIdea | undefined {
+  const idx = ideas.findIndex((i) => i.id === id);
+  if (idx === -1) return undefined;
+  ideas[idx] = { ...ideas[idx], ...updates, id: ideas[idx].id };
+  return ideas[idx];
+}
+
+export function deleteIdea(id: string): boolean {
+  const idx = ideas.findIndex((i) => i.id === id);
+  if (idx === -1) return false;
+  ideas[idx].deletedStatus = true;
   return true;
 }

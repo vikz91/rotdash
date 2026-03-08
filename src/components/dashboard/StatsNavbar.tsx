@@ -247,7 +247,7 @@ export default function StatsNavbar({
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <div className="block w-full min-h-8 h-8 rounded-md overflow-hidden bg-muted/30 cursor-default" />
+                  <div className="block w-full min-h-8 h-8 rounded-md overflow-hidden bg-muted/30 cursor-default [&_.recharts-surface]:min-w-[60px]" />
                 }
               >
                 <ResponsiveContainer width="100%" height={32}>
@@ -264,7 +264,7 @@ export default function StatsNavbar({
                     />
                   </LineChart>
                 </ResponsiveContainer>
-            </TooltipTrigger>
+              </TooltipTrigger>
             <TooltipContent
               side="bottom"
               className="min-w-[220px] max-w-[260px] p-0 flex flex-col overflow-hidden"

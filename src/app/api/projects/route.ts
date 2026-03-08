@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
     const tag = searchParams.get("tag") || undefined;
     const projectType = searchParams.get("projectType") || undefined;
     const search = searchParams.get("search") || undefined;
+    const hasTasks = searchParams.get("hasTasks") || undefined;
 
     const result = listProjects({
       page,
@@ -21,6 +22,7 @@ export async function GET(request: NextRequest) {
       tag,
       projectType,
       search,
+      hasTasks,
     });
 
     return NextResponse.json(result);

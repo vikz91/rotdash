@@ -33,7 +33,7 @@ Do not introduce new libraries.
 
 # 1. Replace "Project Health" With Rot Index
 
-Status: TODO
+Status: DONE
 
 ## Problem
 
@@ -83,7 +83,7 @@ MostRottingProjects.tsx
 
 # 2. Improve Next Actions Card Hierarchy
 
-Status: TODO
+Status: DONE
 
 ## Problem
 
@@ -125,7 +125,7 @@ NextActions.tsx
 
 # 3. Replace Duplicate Third Card
 
-Status: TODO
+Status: DONE
 
 ## Problem
 
@@ -175,7 +175,7 @@ ReviveProjectCard.tsx
 
 # 4. Increase Rot Visibility In Project Cards
 
-Status: TODO
+Status: DONE
 
 ## Problem
 
@@ -219,7 +219,7 @@ ProjectCard.tsx
 
 # 5. Improve Rot Days Label
 
-Status: TODO
+Status: DONE
 
 ## Problem
 
@@ -251,7 +251,7 @@ ProjectCard.tsx
 
 # 6. Add "No Tasks" Filter
 
-Status: TODO
+Status: DONE
 
 ## Problem
 
@@ -287,7 +287,7 @@ ProjectFilters.tsx
 
 # 7. Add Live Notes Widget
 
-Status: TODO
+Status: DONE
 
 ## Purpose
 
@@ -325,7 +325,7 @@ Top section (4th widget).
 
 # 8. Add Idea Inbox
 
-Status: TODO
+Status: DONE
 
 ## Purpose
 
@@ -365,7 +365,7 @@ Lower half of the fourth widget.
 
 # 9. Split Fourth Widget
 
-Status: TODO
+Status: DONE
 
 ## Current Plan
 
@@ -400,7 +400,7 @@ IdeaInboxWidget
 
 # 10. Improve Card Hover Feedback
 
-Status: TODO
+Status: DONE
 
 ## Goal
 

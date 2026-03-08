@@ -24,17 +24,39 @@ export const MOCK_ACTIVITY_DISTRIBUTION: ProjectActivityDistribution[] = [
   { name: "Glacier", value: MOCK_METRICS.glacierProjects, color: "#94a3b8" },
 ];
 
-export const MOCK_ACTIVITY = Array.from({ length: 30 }, (_, i) => {
+import type { ActivityDataPoint } from "@/lib/types";
+
+/** Mock activity graph: tasks completed per day over last 30 days. */
+export const MOCK_ACTIVITY_GRAPH: ActivityDataPoint[] = Array.from(
+  { length: 30 },
+  (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (29 - i));
+    return {
+      date: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      tasks: [
+        3, 5, 2, 7, 4, 6, 3, 8, 5, 4, 6, 2, 5, 3, 4, 2, 1, 0, 1, 2, 1, 0, 0,
+        1, 0, 0, 0, 1, 0, 0,
+      ][i],
+    };
+  }
+);
+
+/** @deprecated Use MOCK_ACTIVITY_GRAPH */
+export const MOCK_ACTIVITY = MOCK_ACTIVITY_GRAPH;
+
+function daysAgo(days: number): string {
   const d = new Date();
-  d.setDate(d.getDate() - (29 - i));
-  return {
-    date: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-    tasks: [
-      3, 5, 2, 7, 4, 6, 3, 8, 5, 4, 6, 2, 5, 3, 4, 2, 1, 0, 1, 2, 1, 0, 0, 1, 0,
-      0, 0, 1, 0, 0,
-    ][i],
-  };
-});
+  d.setDate(d.getDate() - days);
+  return d.toISOString();
+}
+
+/** Mock ideas for Idea Inbox (timestamps relative to now). */
+export const MOCK_IDEAS = [
+  { id: "idea-1", text: "AI CLI for devops", createdAt: daysAgo(2) },
+  { id: "idea-2", text: "macOS automation tool", createdAt: daysAgo(7) },
+  { id: "idea-3", text: "rust web framework", createdAt: daysAgo(180) },
+];
 
 export const MOCK_PROJECTS = [
   {

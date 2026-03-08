@@ -15,6 +15,7 @@ export type ProjectFiltersState = {
   projectType: string;
   status: string;
   activityStatus: string;
+  hasTasks: string;
   search: string;
   /** @deprecated Kept for backward compat */
   tag?: string;
@@ -47,10 +48,17 @@ const ACTIVITY_STATUS_OPTIONS = [
   { value: "glacier", label: "Glacier" },
 ];
 
+const HAS_TASKS_OPTIONS = [
+  { value: ALL, label: "Tasks" },
+  { value: "no-tasks", label: "No Tasks" },
+  { value: "with-tasks", label: "With Tasks" },
+];
+
 export const DEFAULT_FILTERS: ProjectFiltersState = {
   projectType: "",
   status: "",
   activityStatus: "",
+  hasTasks: "",
   search: "",
 };
 
@@ -67,6 +75,7 @@ export default function ProjectFilters({ filters, onFiltersChange }: Props) {
   const normalizedType = filters.projectType || ALL;
   const normalizedStatus = filters.status || ALL;
   const normalizedActivity = filters.activityStatus || ALL;
+  const normalizedHasTasks = filters.hasTasks || ALL;
 
   return (
     <div className="mb-5 flex flex-wrap items-center gap-3">
@@ -76,7 +85,7 @@ export default function ProjectFilters({ filters, onFiltersChange }: Props) {
           handleChange("projectType", v === ALL || !v ? "" : v)
         }
         items={Object.fromEntries(
-          PROJECT_TYPE_OPTIONS.map((o) => [o.value, o.label])
+          PROJECT_TYPE_OPTIONS.map((o) => [o.value, o.label]),
         )}
       >
         <SelectTrigger
@@ -96,10 +105,10 @@ export default function ProjectFilters({ filters, onFiltersChange }: Props) {
 
       <Select
         value={normalizedStatus}
-        onValueChange={(v) =>
-          handleChange("status", v === ALL || !v ? "" : v)
-        }
-        items={Object.fromEntries(STATUS_OPTIONS.map((o) => [o.value, o.label]))}
+        onValueChange={(v) => handleChange("status", v === ALL || !v ? "" : v)}
+        items={Object.fromEntries(
+          STATUS_OPTIONS.map((o) => [o.value, o.label]),
+        )}
       >
         <SelectTrigger
           className="h-9 min-w-[120px] rounded-lg border-slate-700/60 bg-slate-900/40"
@@ -122,7 +131,7 @@ export default function ProjectFilters({ filters, onFiltersChange }: Props) {
           handleChange("activityStatus", v === ALL || !v ? "" : v)
         }
         items={Object.fromEntries(
-          ACTIVITY_STATUS_OPTIONS.map((o) => [o.value, o.label])
+          ACTIVITY_STATUS_OPTIONS.map((o) => [o.value, o.label]),
         )}
       >
         <SelectTrigger
@@ -133,6 +142,30 @@ export default function ProjectFilters({ filters, onFiltersChange }: Props) {
         </SelectTrigger>
         <SelectContent>
           {ACTIVITY_STATUS_OPTIONS.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select
+        value={normalizedHasTasks}
+        onValueChange={(v) =>
+          handleChange("hasTasks", v === ALL || !v ? "" : v)
+        }
+        items={Object.fromEntries(
+          HAS_TASKS_OPTIONS.map((o) => [o.value, o.label]),
+        )}
+      >
+        <SelectTrigger
+          className="h-9 min-w-[120px] rounded-lg border-slate-700/60 bg-slate-900/40"
+          aria-label="Filter by task presence"
+        >
+          <SelectValue placeholder="All" />
+        </SelectTrigger>
+        <SelectContent>
+          {HAS_TASKS_OPTIONS.map((opt) => (
             <SelectItem key={opt.value} value={opt.value}>
               {opt.label}
             </SelectItem>

@@ -141,3 +141,38 @@ body {
     @apply font-sans;
   }
 }
+
+/* Custom scrollbar: thin, styled, auto-hides when not hovering */
+@layer utilities {
+  .scrollbar-autohide {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  .scrollbar-autohide:hover {
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .scrollbar-autohide::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-autohide::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-autohide::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 3px;
+    transition: background 0.15s ease;
+  }
+
+  .scrollbar-autohide:hover::-webkit-scrollbar-thumb {
+    background: var(--border);
+  }
+
+  .scrollbar-autohide::-webkit-scrollbar-thumb:hover {
+    background: var(--foreground-muted);
+  }
+}

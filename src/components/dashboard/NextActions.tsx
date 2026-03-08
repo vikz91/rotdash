@@ -9,9 +9,13 @@ const CARD_CLASSES =
 
 type NextActionsProps = {
   projects: Project[];
+  onProjectClick?: (project: Project) => void;
 };
 
-export default function NextActions({ projects }: NextActionsProps) {
+export default function NextActions({
+  projects,
+  onProjectClick,
+}: NextActionsProps) {
   const nextActions = projects
     .filter((p) => p.nextTask)
     .sort((a, b) => b.rotScore - a.rotScore)
@@ -27,22 +31,26 @@ export default function NextActions({ projects }: NextActionsProps) {
           const { colors } = getActivityConfig(project.activityStatus);
           return (
             <li key={project.id}>
-              <div className="flex items-center gap-3 rounded-md py-2.5 pr-2 transition-colors hover:bg-slate-800/40">
+              <button
+                type="button"
+                onClick={() => onProjectClick?.(project)}
+                className="flex w-full items-center gap-3 rounded-md py-2.5 pr-2 text-left transition-colors hover:bg-slate-800/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
                 <span
                   className={`h-4 w-1 shrink-0 rounded-sm ${colors.bar}`}
                   aria-hidden
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium text-foreground">{project.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    → {project.nextTask}
+                  <p className="font-semibold text-foreground">
+                    {project.nextTask}
                   </p>
+                  <p className="text-sm text-muted-foreground">{project.name}</p>
                 </div>
                 <ChevronRight
                   className="size-4 shrink-0 text-muted-foreground"
                   aria-hidden
                 />
-              </div>
+              </button>
             </li>
           );
         })}
