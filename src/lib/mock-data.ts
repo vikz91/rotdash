@@ -7,6 +7,7 @@ export const MOCK_METRICS = {
   glacierProjects: 6,
   totalTasks: 47,
   blockedTasks: 5,
+  lastActivity: "2 days ago",
 };
 
 export type ProjectActivityDistribution = {
