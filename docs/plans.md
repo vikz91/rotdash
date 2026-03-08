@@ -1,77 +1,316 @@
-# RotDash — Dashboard Improvement Plan (Execution Tracker)
+# RotDash — Dashboard Polish & Insight System Plan
 
-This file is used to track the implementation progress of dashboard improvements.
+This document defines the **next iteration tasks** for RotDash after the current dashboard implementation.
 
-Cursor agents should **work through tasks sequentially**.
+The goal of this phase is **product polish and motivation signals**, not major UI restructuring.
 
-Each task must be completed and verified before moving to the next.
+Focus areas:
 
-Status values:
+* momentum feedback
+* shipping awareness
+* rot awareness
+* minor UX improvements
+* insight messages
 
-```
+Cursor agents must **execute tasks sequentially**.
+
+---
+
+# Status Values
+
+Each task must have a status.
+
+```id="status_values"
 TODO
 IN_PROGRESS
 DONE
 SKIPPED
 ```
 
+Agents must:
+
+1. find the first TODO
+2. implement it
+3. update status to DONE
+
 ---
 
-# 0. Rules For Cursor Agents
+# Execution Rules for Cursor
 
 When implementing tasks:
 
-1. Follow architecture in `docs/architecture.md`
-2. Follow product scope in `docs/features.md`
-3. Only modify components related to the task
-4. Avoid redesigning unrelated UI sections
-5. Keep styling consistent with Tailwind + shadcn
-
-Do not introduce new libraries.
+1. Follow `docs/architecture.md`
+2. Follow `docs/features.md`
+3. Modify only relevant components
+4. Avoid changing layout structure
+5. Use existing Tailwind + shadcn patterns
+6. Do not introduce new libraries
 
 ---
 
-# 1. Replace "Project Health" With Rot Index
+# 1. Add Global Insight Banner
+
+Status: DONE
+
+## Purpose
+
+Provide **global project insights** that are not tied to a single project.
+
+Examples:
+
+```id="insight_examples"
+⚠ You haven't shipped anything in 38 days
+🚀 Last project shipped 2 days ago
+🔥 You're on a 4 day build streak
+⚠ 58% of your projects are rotting
+```
+
+## Placement
+
+show it in navbar beside activity graph
+
+Example layout:
+
+```id="insight_layout"
+NAVBAR
+-------------------------
+
+⚠ You haven't shipped anything in 38 days
+
+[ dashboard cards ]
+```
+
+## Styling
+
+Use subtle visual emphasis.
+
+Example Tailwind:
+
+```id="insight_style"
+text-sm
+text-amber-400
+flex items-center
+gap-2
+```
+
+Optional background:
+
+```id="insight_bg"
+bg-amber-500/10
+rounded-md
+px-3 py-1
+```
+
+## Component
+
+Create:
+
+```id="component_insight"
+components/dashboard/GlobalInsightBanner.tsx
+```
+
+---
+
+# 2. Implement Build Streak Indicator
+
+Status: DONE
+
+## Purpose
+
+Encourage consistent development activity.
+
+## Location
+
+Navbar status indicator.
+
+Example:
+
+```id="streak_navbar"
+🔥 3d
+```
+
+Meaning:
+
+```id="streak_meaning"
+3 day build streak
+```
+
+## Tooltip
+
+```id="streak_tooltip"
+Build streak
+Worked on a project 3 days in a row
+```
+
+Use shadcn tooltip.
+
+## Calculation
+
+Define activity as:
+
+```id="activity_rule"
+task completed
+OR project updated
+```
+
+Simplest rule for MVP:
+
+```id="streak_algo"
+use task.completedOn dates
+```
+
+Algorithm:
+
+1. start from today
+2. count consecutive days with completed tasks
+3. stop when day without activity is found
+
+Example:
+
+```
+Mar 8 ✓
+Mar 7 ✓
+Mar 6 ✓
+Mar 5 ✗
+```
+
+Result:
+
+```
+streak = 3
+```
+
+## Component
+
+Modify:
+
+```id="navbar_metrics"
+NavbarMetrics.tsx
+```
+
+---
+
+# 3. Add "Days Since Last Ship" Metric
+
+Status: DONE
+
+## Purpose
+
+Encourage developers to ship more frequently.
+
+## Definition of Ship
+
+Ship event occurs when:
+
+```id="ship_event"
+project.status changes to "shipped"
+```
+
+Track:
+
+```id="ship_field"
+project.lastShippedAt
+```
+
+## Calculation
+
+```
+daysSinceLastShip = today - lastShippedAt
+```
+
+## Usage
+
+Displayed inside **Global Insight Banner**.
+
+Example messages:
+
+```id="ship_messages"
+⚠ You haven't shipped anything in 38 days
+⏳ Last project shipped 12 days ago
+🚀 Last project shipped 2 days ago
+```
+
+---
+
+# 4. Add Decay Alert System
+
+Status: DONE
+
+## Purpose
+
+Warn users when projects are approaching glacier state.
+
+## Rule
+
+If project inactivity is close to glacier threshold.
+
+Example:
+
+```id="glacier_rule"
+glacier threshold = 60 days
+alert when inactivity ≥ 50 days
+```
+
+## Example Message
+
+```id="decay_alert_examples"
+⚠ 3 projects will become glacier this week
+⚠ Portfolio v3 will become glacier in 3 days
+```
+
+## Placement
+
+Displayed inside **Global Insight Banner**.
+
+Priority order:
+
+1. decay alerts
+2. no shipping warning
+3. build streak message
+
+## Component
+
+Extend:
+
+```id="decay_component"
+GlobalInsightBanner.tsx
+```
+
+---
+
+# 5. Improve Rot Index Visual Hierarchy
 
 Status: DONE
 
 ## Problem
 
-The current **Project Health bar** is ambiguous and unclear.
-
-Users cannot understand what the metric represents.
-
-Current UI:
-
-```
-Project Health
-██████░░░░
-```
-
-## Solution
-
-Replace it with **Rot Index**.
+Rot index percentage is currently visually weak.
 
 Example:
 
 ```
 ROT INDEX
-62%
+58%
 ```
 
-Meaning:
+## Solution
 
+Increase emphasis.
+
+Recommended hierarchy:
+
+```id="rot_index_layout"
+ROT INDEX
+58%
+of projects rotting
 ```
-62% of projects are stale, cold, or glacier
+
+## Styling
+
+```id="rot_index_style"
+text-3xl
+font-bold
 ```
-
-## Implementation
-
-Tasks:
-
-* calculate percentage of projects where activityStatus ∈ {stale, cold, glacier}
-* display percentage
-* optionally display progress bar
 
 Component:
 
@@ -81,26 +320,26 @@ MostRottingProjects.tsx
 
 ---
 
-# 2. Improve Next Actions Card Hierarchy
+# 6. Improve Next Actions Card Hierarchy
 
 Status: DONE
 
 ## Problem
 
-The UI emphasizes project names instead of tasks.
+Project name currently dominates the card.
 
 Example:
 
 ```
 Discord Bot Rewrite
-→ Fix slash command handling
+Fix slash command handling
 ```
-
-Users care about **the task**.
 
 ## Solution
 
-Swap hierarchy:
+Reverse emphasis.
+
+Example:
 
 ```
 Fix slash command handling
@@ -109,11 +348,9 @@ Discord Bot Rewrite
 
 ## Implementation
 
-Changes:
-
-* increase task font weight
-* reduce project name prominence
-* maintain arrow icon for navigation
+* task title larger
+* project name smaller
+* retain arrow navigation
 
 Component:
 
@@ -123,47 +360,57 @@ NextActions.tsx
 
 ---
 
-# 3. Replace Duplicate Third Card
+# 7. Add Rot Context to Next Actions
+
+Status: DONE
+
+## Purpose
+
+Reinforce RotDash concept.
+
+Example:
+
+```
+Choose design direction
+Portfolio v3
+120 days inactive
+```
+
+Add inactivity indicator below project name.
+
+Component:
+
+```
+NextActions.tsx
+```
+
+---
+
+# 8. Improve Revive Project Card
 
 Status: DONE
 
 ## Problem
 
-Cards 2 and 3 both display **Next Actions**, creating redundancy.
+Revive card lacks urgency.
+
+Current:
+
+```
+Portfolio v3
+Last updated 120 days ago
+```
 
 ## Solution
 
-Replace the third card with:
+Add rot badge.
+
+Example:
 
 ```
-Revive Project
+❄ GLACIER
+120 days inactive
 ```
-
-Purpose:
-
-Encourage users to resume work on dormant projects.
-
-## Example UI
-
-```
-REVIVE A PROJECT
-
-Pet Store
-Last updated: 43 days ago
-
-Next task:
-Connect print provider
-
-[ Revive Project ]
-```
-
-## Implementation
-
-Logic:
-
-* find project with highest rotScore that still has tasks
-* display next task
-* clicking button opens project modal
 
 Component:
 
@@ -173,254 +420,51 @@ ReviveProjectCard.tsx
 
 ---
 
-# 4. Increase Rot Visibility In Project Cards
-
-Status: DONE
-
-## Problem
-
-Activity status is visually subtle.
-
-Example:
-
-```
-glacier
-```
-
-This makes scanning difficult.
-
-## Solution
-
-Improve status visibility.
-
-Example:
-
-```
-❄ GLACIER
-130 days inactive
-```
-
-## Implementation
-
-Changes:
-
-* add icon
-* increase font size
-* increase contrast
-* keep left border indicator
-
-Component:
-
-```
-ProjectCard.tsx
-```
-
----
-
-# 5. Improve Rot Days Label
-
-Status: DONE
-
-## Problem
-
-Current label:
-
-```
-~130d
-```
-
-This is unclear.
-
-## Solution
-
-Use descriptive text.
-
-Example:
-
-```
-130 days inactive
-```
-
-Component:
-
-```
-ProjectCard.tsx
-```
-
----
-
-# 6. Add "No Tasks" Filter
-
-Status: DONE
-
-## Problem
-
-Users cannot easily detect projects without tasks.
-
-## Solution
-
-Add filter:
-
-```
-No Tasks
-```
-
-## Implementation
-
-Update filters section.
-
-Possible filter values:
-
-```
-All
-No Tasks
-With Tasks
-```
-
-Component:
-
-```
-ProjectFilters.tsx
-```
-
----
-
-# 7. Add Live Notes Widget
-
-Status: DONE
-
-## Purpose
-
-Allow developers to quickly capture thoughts.
-
-## Example UI
-
-```
-LIVE NOTES
-
-• remember to setup redis
-• fix docker build
-• try rust rewrite
-```
-
-## Implementation
-
-Features:
-
-* inline editing
-* simple text entries
-* persistent storage
-
-Component:
-
-```
-LiveNotesWidget.tsx
-```
-
-Location:
-
-Top section (4th widget).
-
----
-
-# 8. Add Idea Inbox
-
-Status: DONE
-
-## Purpose
-
-Capture ideas before they become new unfinished repositories.
-
-## Example UI
-
-```
-IDEA INBOX
-
-• AI CLI for devops
-• macOS automation tool
-• rust web framework
-
-+ Capture Idea
-```
-
-## Implementation
-
-Features:
-
-* quick add button
-* simple list
-* editable entries
-
-Component:
-
-```
-IdeaInboxWidget.tsx
-```
-
-Location:
-
-Lower half of the fourth widget.
-
----
-
-# 9. Split Fourth Widget
-
-Status: DONE
-
-## Current Plan
-
-The fourth widget should be divided vertically.
-
-Layout:
-
-```
------------------------
-LIVE NOTES
------------------------
-IDEA INBOX
------------------------
-```
-
-## Implementation
-
-Create container component:
-
-```
-NotesAndIdeasPanel.tsx
-```
-
-Contains:
-
-```
-LiveNotesWidget
-IdeaInboxWidget
-```
-
----
-
-# 10. Improve Card Hover Feedback
+# 9. Strengthen Project Card Rot Signals
 
 Status: DONE
 
 ## Goal
 
-Make project cards easier to scan and interact with.
+Improve scanability of project grid.
 
-## Improvements
+Changes:
 
-Hover effects:
+* larger rot label
+* add rot icon
+* emphasize inactivity days
+
+Example:
 
 ```
-border highlight
-shadow elevation
-subtle brightness
+❄ GLACIER
+120 days inactive
 ```
+
+Component:
+
+```
+ProjectCard.tsx
+```
+
+---
+
+# 10. Improve Project Card Hover Feedback
+
+Status: DONE
+
+## Goal
+
+Improve card interaction clarity.
+
+Add stronger hover effect.
 
 Example Tailwind:
 
-```
-hover:border-emerald-500/50
-hover:shadow-lg
+```id="hover_effect"
+hover:shadow-xl
+hover:border-slate-500
+hover:scale-[1.01]
 transition-all
 ```
 
@@ -432,75 +476,101 @@ ProjectCard.tsx
 
 ---
 
-# 12. Final Top Section Layout
+# 11. Improve Live Notes Visual Style
 
-Status: TODO
+Status: DONE
 
-Expected layout:
+## Problem
 
-```
-[ Most Rotting ]   [ Next Actions ]   [ Revive Project ]   [ Notes / Ideas ]
-```
+Notes currently feel like raw textarea.
 
-Ensure responsive behavior:
+## Solution
 
-Desktop:
+Make notes appear as quick capture items.
 
-```
-grid-cols-4
-```
-
-Tablet:
+Example:
 
 ```
-grid-cols-2
+• remember to setup redis
+• fix docker build
+• try rust rewrite
 ```
 
-Mobile:
+Future enhancement:
 
 ```
-grid-cols-1
+Shift+Enter → new note
 ```
 
 Component:
 
 ```
-DashboardTopSection.tsx
+LiveNotesWidget.tsx
 ```
 
 ---
 
-# 13. Final UI Review
+# 12. Improve Idea Inbox Visibility
 
-Status: TODO
+Status: DONE
 
-Checklist:
+## Goal
 
-* rot signals visible
-* actions easy to identify
-* no duplicate widgets
-* filters working
-* consistent spacing
-* hover interactions smooth
+Improve timestamp readability.
+
+Example:
+
+```
+2 days ago
+1 week ago
+6 months ago
+```
+
+Increase contrast slightly.
+
+Component:
+
+```
+IdeaInboxWidget.tsx
+```
 
 ---
 
-# Completion Target
+# 13. Final UX Review
 
-When all tasks are DONE:
+Status: DONE
+
+Verify the dashboard communicates:
+
+```id="product_goals"
+Which projects are rotting
+What should be worked on next
+Which project should be revived
+Whether the developer is shipping regularly
+How much project decay exists
+```
+
+Ensure:
+
+* no redundant widgets
+* clear hierarchy
+* consistent spacing
+* responsive behavior
+
+---
+
+# Final Success Criteria
 
 The dashboard should clearly communicate:
 
-```
-1. which projects are rotting
-2. what the developer should do next
-3. which project deserves revival
-4. where ideas and notes can be captured
-```
-
-This reinforces the RotDash core concept:
-
-```
+```id="core_message"
 Your side projects are rotting.
 RotDash helps you revive them.
 ```
+
+The user should immediately understand:
+
+1. which projects are dying
+2. what they should work on next
+3. whether they are making progress
+4. whether they are shipping regularly

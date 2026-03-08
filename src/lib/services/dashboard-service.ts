@@ -4,9 +4,111 @@
 
 import { getProjectsRaw } from "@/lib/store/memory-store";
 import { getTasksRaw } from "@/lib/store/memory-store";
-import { calculateRotScore, getActivityStatus } from "@/lib/services/rot-service";
+import {
+  calculateRotScore,
+  getActivityStatus,
+} from "@/lib/services/rot-service";
 import { MOCK_ACTIVITY_GRAPH } from "@/lib/mock-data";
 import type { StatsNavbarMetrics, ActivityDataPoint } from "@/lib/types";
+
+/**
+ * Build streak: consecutive days (starting today) with completed tasks.
+ * Uses task.completedOn dates. Stops at first day without activity.
+ */
+function getBuildStreak(tasks: { completedOn: string | null }[]): number {
+  const activityDates = new Set<string>();
+  for (const t of tasks) {
+    if (t.completedOn) activityDates.add(t.completedOn);
+  }
+  let streak = 0;
+  const d = new Date();
+  for (;;) {
+    const key = d.toISOString().slice(0, 10);
+    if (!activityDates.has(key)) break;
+    streak++;
+    d.setDate(d.getDate() - 1);
+  }
+  return streak;
+}
+
+/**
+ * Days since most recent project shipment (project.status = shipped, lastShippedAt set).
+ */
+function getDaysSinceLastShip(
+  projects: { status: string; lastShippedAt?: string }[],
+): number | null {
+  const shipped = projects
+    .filter((p) => p.status === "shipped" && p.lastShippedAt)
+    .map((p) => p.lastShippedAt!);
+  if (shipped.length === 0) return null;
+  const latest = shipped.sort().reverse()[0];
+  const ship = new Date(latest);
+  const now = new Date();
+  ship.setHours(0, 0, 0, 0);
+  now.setHours(0, 0, 0, 0);
+  return Math.floor((now.getTime() - ship.getTime()) / (24 * 60 * 60 * 1000));
+}
+
+/** Projects approaching glacier: 50 ≤ rotScore < 60. */
+function getDecayAlertMessage(
+  projects: { id: string; name: string; rotScore: number }[],
+): string | null {
+  const GLACIER_THRESHOLD = 60;
+  const ALERT_THRESHOLD = 50;
+  const approaching = projects.filter(
+    (p) => p.rotScore >= ALERT_THRESHOLD && p.rotScore < GLACIER_THRESHOLD,
+  );
+  if (approaching.length === 0) return null;
+
+  const thisWeek = approaching.filter((p) => p.rotScore >= 53);
+  if (thisWeek.length > 0) {
+    if (thisWeek.length === 1) {
+      const daysLeft = GLACIER_THRESHOLD - thisWeek[0].rotScore;
+      return `${thisWeek[0].name} will become glacier in ${daysLeft} days`;
+    }
+    return `${thisWeek.length} projects will become glacier this week`;
+  }
+  const closest = [...approaching].sort((a, b) => b.rotScore - a.rotScore)[0];
+  const daysLeft = GLACIER_THRESHOLD - closest.rotScore;
+  if (approaching.length === 1) {
+    return `⚠ ${closest.name} will become glacier in ${daysLeft} days`;
+  }
+  return `⚠ ${approaching.length} projects will become glacier this week`;
+}
+
+/**
+ * Insight message for GlobalInsightBanner. Priority: decay alerts > shipping > build streak.
+ */
+function getInsightMessage(
+  projects: { id: string; name: string; rotScore: number }[],
+  daysSinceLastShip: number | null,
+  buildStreak: number,
+  rotPercent: number,
+): string | null {
+  const decayAlert = getDecayAlertMessage(projects);
+  if (decayAlert) return decayAlert;
+
+  if (daysSinceLastShip !== null) {
+    if (daysSinceLastShip >= 30)
+      return `You haven't shipped anything in ${daysSinceLastShip} days`;
+    if (daysSinceLastShip >= 7)
+      return `Last project shipped ${daysSinceLastShip} days ago`;
+    if (daysSinceLastShip <= 2) {
+      const suffix =
+        daysSinceLastShip === 0
+          ? "today"
+          : daysSinceLastShip === 1
+            ? "yesterday"
+            : `${daysSinceLastShip} days ago`;
+      return `Last project shipped ${suffix}`;
+    }
+    return `Last project shipped ${daysSinceLastShip} days ago`;
+  }
+  if (buildStreak >= 2) return `You're on a ${buildStreak} day build streak`;
+  if (rotPercent >= 50)
+    return `${Math.round(rotPercent)}% of your projects are rotting`;
+  return null;
+}
 
 function formatLastActivity(dateStr: string): string {
   const d = new Date(dateStr);
@@ -22,7 +124,10 @@ function formatLastActivity(dateStr: string): string {
   return `${Math.floor(diffDays / 365)} years ago`;
 }
 
-export function getDashboardStats(): { metrics: StatsNavbarMetrics; activity: ActivityDataPoint[] } {
+export function getDashboardStats(): {
+  metrics: StatsNavbarMetrics;
+  activity: ActivityDataPoint[];
+} {
   const projects = getProjectsRaw().filter((p) => !p.deletedStatus);
   const tasks = getTasksRaw().filter((t) => !t.deletedStatus);
 
@@ -88,6 +193,19 @@ export function getDashboardStats(): { metrics: StatsNavbarMetrics; activity: Ac
 
   const blockedTasks = tasks.filter((t) => t.status === "blocked").length;
 
+  const buildStreak = getBuildStreak(tasks);
+  const daysSinceLastShip = getDaysSinceLastShip(projects);
+  const rotPercent =
+    projects.length > 0
+      ? (100 * (stale + cold + glacier)) / projects.length
+      : 0;
+  const insightMessage = getInsightMessage(
+    projects.map((p) => ({ id: p.id, name: p.name, rotScore: p.rotScore })),
+    daysSinceLastShip,
+    buildStreak,
+    rotPercent,
+  );
+
   const metrics: StatsNavbarMetrics = {
     totalProjects: projects.length,
     hotProjects: hot,
@@ -97,7 +215,12 @@ export function getDashboardStats(): { metrics: StatsNavbarMetrics; activity: Ac
     glacierProjects: glacier,
     totalTasks: tasks.length,
     blockedTasks,
-    lastActivity: lastActivityDate ? formatLastActivity(lastActivityDate) : "never",
+    lastActivity: lastActivityDate
+      ? formatLastActivity(lastActivityDate)
+      : "never",
+    buildStreak,
+    daysSinceLastShip,
+    insightMessage,
   };
 
   const activity: ActivityDataPoint[] = activityDates;

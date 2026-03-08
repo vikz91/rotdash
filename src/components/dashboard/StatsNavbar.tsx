@@ -55,6 +55,17 @@ export default function StatsNavbar({
 }: StatsNavbarProps) {
   const statItems = [
     {
+      label: "Streak",
+      value: metrics.buildStreak,
+      valueDisplay: `${metrics.buildStreak}d`,
+      accent: "text-amber-400",
+      icon: Flame,
+      tooltip: {
+        body: `Worked on a project ${metrics.buildStreak} day${metrics.buildStreak === 1 ? "" : "s"} in a row`,
+        next: "Complete a task today to keep your streak going.",
+      } satisfies TooltipContent,
+    },
+    {
       label: "Hot",
       value: metrics.hotProjects,
       accent: ACTIVITY_COLORS.hot,
@@ -63,6 +74,7 @@ export default function StatsNavbar({
         body: "{value} projects are hot — actively worked on in the last 0–2 days.",
         next: "Keep the momentum going.",
       } satisfies TooltipContent,
+      separatorBefore: true,
     },
     {
       label: "Warm",
@@ -213,20 +225,18 @@ export default function StatsNavbar({
                           </span>
                         </div>
                         <p className="px-3 pb-3 text-xs text-background/90 leading-relaxed">
-                          {item.tooltip.body
-                            .split("{value}")
-                            .map((part, i) =>
-                              i === 0 ? (
-                                part
-                              ) : (
-                                <span key={i}>
-                                  <span className="font-semibold text-background">
-                                    {item.valueDisplay ?? item.value}
-                                  </span>
-                                  {part}
+                          {item.tooltip.body.split("{value}").map((part, i) =>
+                            i === 0 ? (
+                              part
+                            ) : (
+                              <span key={i}>
+                                <span className="font-semibold text-background">
+                                  {item.valueDisplay ?? item.value}
                                 </span>
-                              )
-                            )}
+                                {part}
+                              </span>
+                            ),
+                          )}
                         </p>
                         {item.tooltip.next && (
                           <footer className="border-t border-background/20 px-3 py-2">
@@ -243,7 +253,7 @@ export default function StatsNavbar({
             </div>
           </div>
 
-          <div className="hidden sm:flex flex-1 min-w-[120px]">
+          <div className="hidden sm:flex flex-1 min-w-[120px] items-center gap-3">
             <Tooltip>
               <TooltipTrigger
                 render={
@@ -265,30 +275,30 @@ export default function StatsNavbar({
                   </LineChart>
                 </ResponsiveContainer>
               </TooltipTrigger>
-            <TooltipContent
-              side="bottom"
-              className="min-w-[220px] max-w-[260px] p-0 flex flex-col overflow-hidden"
-            >
-              <div className="flex items-center gap-2 px-3 pt-3 pb-2">
-                <TrendingUp
-                  className="size-4 shrink-0 text-[var(--chart-1)]"
-                  aria-hidden
-                />
-                <span className="font-semibold text-sm text-background">
-                  Activity trend
-                </span>
-              </div>
-              <p className="px-3 pb-3 text-xs text-background/90 leading-relaxed">
-                Tasks completed per day across your projects over the last 30
-                days. Higher bars indicate more active periods.
-              </p>
-              <footer className="border-t border-background/20 px-3 py-2">
-                <p className="text-[10px] text-background/70">
-                  Scroll down for the full chart and project details.
+              <TooltipContent
+                side="bottom"
+                className="min-w-[220px] max-w-[260px] p-0 flex flex-col overflow-hidden"
+              >
+                <div className="flex items-center gap-2 px-3 pt-3 pb-2">
+                  <TrendingUp
+                    className="size-4 shrink-0 text-[var(--chart-1)]"
+                    aria-hidden
+                  />
+                  <span className="font-semibold text-sm text-background">
+                    Activity trend
+                  </span>
+                </div>
+                <p className="px-3 pb-3 text-xs text-background/90 leading-relaxed">
+                  Tasks completed per day across your projects over the last 30
+                  days. Higher bars indicate more active periods.
                 </p>
-              </footer>
-            </TooltipContent>
-          </Tooltip>
+                <footer className="border-t border-background/20 px-3 py-2">
+                  <p className="text-[10px] text-background/70">
+                    Scroll down for the full chart and project details.
+                  </p>
+                </footer>
+              </TooltipContent>
+            </Tooltip>
           </div>
           <Button
             size="lg"

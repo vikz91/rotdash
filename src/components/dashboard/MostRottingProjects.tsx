@@ -70,11 +70,11 @@ export default function MostRottingProjects({ projects }: MostRottingProjectsPro
         <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Rot Index
         </p>
-        <p className="mb-2 text-2xl font-semibold tabular-nums text-foreground">
+        <p className="text-3xl font-bold tabular-nums text-foreground">
           {healthPercent}%
         </p>
-        <p className="mb-3 text-xs text-muted-foreground">
-          {healthPercent}% of projects are stale, cold, or glacier
+        <p className="mt-1 text-xs text-muted-foreground">
+          of projects rotting
         </p>
         <div className="h-2 w-full overflow-hidden rounded-full bg-slate-700/60">
           <div

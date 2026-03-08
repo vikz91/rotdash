@@ -41,10 +41,17 @@ export default function NextActions({
                   aria-hidden
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-foreground">
+                  <p className="text-lg font-semibold text-foreground">
                     {project.nextTask}
                   </p>
                   <p className="text-sm text-muted-foreground">{project.name}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {project.rotScore === 0
+                      ? "Updated today"
+                      : project.rotScore === 1
+                        ? "1 day inactive"
+                        : `${project.rotScore} days inactive`}
+                  </p>
                 </div>
                 <ChevronRight
                   className="size-4 shrink-0 text-muted-foreground"

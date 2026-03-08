@@ -100,9 +100,10 @@ export default function IdeaInboxWidget() {
                       "hover:bg-slate-700/40 focus:outline-none focus:ring-1 focus:ring-slate-500",
                     )}
                   >
-                    <span className="text-muted-foreground">
-                      {formatTimeAgo(idea.createdAt)} •
-                    </span>{" "}
+                    <span className="text-foreground/80 font-medium">
+                      {formatTimeAgo(idea.createdAt)}
+                    </span>
+                    <span className="text-muted-foreground"> • </span>
                     {idea.text}
                   </button>
                 )}

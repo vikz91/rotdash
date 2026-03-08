@@ -72,9 +72,9 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
       className={cn(
         "group relative flex min-h-[180px] flex-col overflow-hidden rounded-xl text-left",
         "border border-slate-700/40 bg-slate-900/60 backdrop-blur",
-        "border-l-4 transition-all duration-200",
+        "border-l-4 transition-all",
         activity.borderColor,
-        "hover:border-emerald-500/50 hover:shadow-lg hover:brightness-105",
+        "hover:border-slate-500 hover:shadow-xl hover:scale-[1.01] hover:brightness-105",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         "cursor-pointer",
       )}
@@ -119,20 +119,20 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
           {middleText}
         </p>
 
-        {/* Bottom: rot visibility — icon, status, days inactive */}
+        {/* Bottom: rot visibility — larger icon, status, days inactive */}
         <div className="mt-auto pt-3">
           <div
             className={cn(
-              "flex items-center gap-2 rounded-md px-2 py-1.5",
+              "flex items-center gap-3 rounded-md px-3 py-2",
               activity.bgClass,
             )}
           >
-            <ActivityIcon className="size-4 shrink-0" aria-hidden />
+            <ActivityIcon className="size-5 shrink-0" aria-hidden />
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold uppercase tracking-wide">
+              <div className="text-base font-bold uppercase tracking-wide">
                 {project.activityStatus}
               </div>
-              <div className="text-xs tabular-nums opacity-90">
+              <div className="text-sm font-medium tabular-nums opacity-95">
                 {project.rotScore} day{project.rotScore === 1 ? "" : "s"}{" "}
                 inactive
               </div>

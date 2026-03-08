@@ -160,7 +160,12 @@ export function updateProject(id: string, updates: Partial<Project>): Project | 
   if (updates.name !== undefined) storeUpdates.name = updates.name;
   if (updates.description !== undefined) storeUpdates.description = updates.description;
   if (updates.tags !== undefined) storeUpdates.tags = updates.tags;
-  if (updates.status !== undefined) storeUpdates.status = updates.status;
+  if (updates.status !== undefined) {
+    storeUpdates.status = updates.status;
+    if (updates.status === "shipped" && existing.status !== "shipped") {
+      storeUpdates.lastShippedAt = new Date().toISOString().slice(0, 10);
+    }
+  }
   if (updates.healthStatus !== undefined) storeUpdates.healthStatus = updates.healthStatus;
   if (updates.image !== undefined) storeUpdates.image = updates.image;
   if (updates.githubUrl !== undefined) storeUpdates.githubUrl = updates.githubUrl;

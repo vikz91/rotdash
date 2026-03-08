@@ -10,6 +10,12 @@ export type StatsNavbarMetrics = {
   totalTasks: number;
   blockedTasks: number;
   lastActivity: string;
+  /** Consecutive days with task completion or project update */
+  buildStreak: number;
+  /** Days since most recent project shipped */
+  daysSinceLastShip: number | null;
+  /** Insight message for GlobalInsightBanner */
+  insightMessage: string | null;
 };
 
 /** Single data point for the activity graph (tasks completed per day). */

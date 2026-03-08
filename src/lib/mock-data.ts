@@ -8,6 +8,9 @@ export const MOCK_METRICS = {
   totalTasks: 47,
   blockedTasks: 5,
   lastActivity: "2 days ago",
+  buildStreak: 0,
+  daysSinceLastShip: null as number | null,
+  insightMessage: null as string | null,
 };
 
 export type ProjectActivityDistribution = {
@@ -49,6 +52,13 @@ function daysAgo(days: number): string {
   const d = new Date();
   d.setDate(d.getDate() - days);
   return d.toISOString();
+}
+
+/** YYYY-MM-DD for task completedOn (build streak uses consecutive days from today). */
+function dateDaysAgo(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d.toISOString().slice(0, 10);
 }
 
 /** Mock ideas for Idea Inbox (timestamps relative to now). */
@@ -420,6 +430,52 @@ import type { Task } from "./task-schema";
 export type { Task };
 
 export const MOCK_TASKS: Task[] = [
+  // Build streak: tasks completed on last 5 consecutive days (today → 4 days ago)
+  {
+    id: "t-streak-1",
+    projectId: "1111",
+    title: "Streak day 1",
+    description: "Mock task for build streak.",
+    status: "done",
+    dueDate: dateDaysAgo(0),
+    completedOn: dateDaysAgo(0),
+  },
+  {
+    id: "t-streak-2",
+    projectId: "1111",
+    title: "Streak day 2",
+    description: "Mock task for build streak.",
+    status: "done",
+    dueDate: dateDaysAgo(1),
+    completedOn: dateDaysAgo(1),
+  },
+  {
+    id: "t-streak-3",
+    projectId: "1111",
+    title: "Streak day 3",
+    description: "Mock task for build streak.",
+    status: "done",
+    dueDate: dateDaysAgo(2),
+    completedOn: dateDaysAgo(2),
+  },
+  {
+    id: "t-streak-4",
+    projectId: "1111",
+    title: "Streak day 4",
+    description: "Mock task for build streak.",
+    status: "done",
+    dueDate: dateDaysAgo(3),
+    completedOn: dateDaysAgo(3),
+  },
+  {
+    id: "t-streak-5",
+    projectId: "1111",
+    title: "Streak day 5",
+    description: "Mock task for build streak.",
+    status: "done",
+    dueDate: dateDaysAgo(4),
+    completedOn: dateDaysAgo(4),
+  },
   {
     id: "t-rotdash-1",
     projectId: "1111",

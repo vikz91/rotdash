@@ -21,6 +21,8 @@ export type StoreProject = {
   githubUrl: string;
   prodUrl: string;
   analyticsUrl: string;
+  /** Set when status changes to "shipped" */
+  lastShippedAt?: string;
   createdAt: string;
   updatedAt: string;
   deletedStatus: boolean;
@@ -70,6 +72,7 @@ function seedProjects(): StoreProject[] {
       githubUrl: p.githubUrl ?? "",
       prodUrl: p.prodUrl ?? "",
       analyticsUrl: p.analyticsUrl ?? "",
+      lastShippedAt: status === "shipped" ? updatedAt : undefined,
       createdAt,
       updatedAt,
       deletedStatus: false,

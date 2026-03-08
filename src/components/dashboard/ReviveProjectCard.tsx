@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
+import { getActivityConfig } from "@/lib/activity-config";
 import type { Project } from "@/lib/project-schema";
 
 const CARD_CLASSES =
@@ -33,12 +34,13 @@ export default function ReviveProjectCard({
     );
   }
 
-  const daysLabel =
+  const { colors, icon: RotIcon } = getActivityConfig(projectToRevive.activityStatus);
+  const inactiveLabel =
     projectToRevive.rotScore === 0
       ? "Updated today"
       : projectToRevive.rotScore === 1
-        ? "Last updated: 1 day ago"
-        : `Last updated: ${projectToRevive.rotScore} days ago`;
+        ? "1 day inactive"
+        : `${projectToRevive.rotScore} days inactive`;
 
   return (
     <div className={CARD_CLASSES}>
@@ -46,8 +48,14 @@ export default function ReviveProjectCard({
         Revive a Project
       </h3>
       <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <RotIcon className={`size-4 shrink-0 ${colors.text}`} aria-hidden />
+          <span className={`text-xs font-semibold uppercase tracking-wider ${colors.text}`}>
+            {projectToRevive.activityStatus}
+          </span>
+        </div>
         <p className="font-semibold text-foreground">{projectToRevive.name}</p>
-        <p className="text-sm text-muted-foreground">{daysLabel}</p>
+        <p className="text-sm text-muted-foreground">{inactiveLabel}</p>
         <div className="pt-1">
           <p className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Next task

@@ -23,6 +23,7 @@ import {
 import type { Project } from "@/lib/project-schema";
 import type { Task } from "@/lib/task-schema";
 import type { StatsNavbarMetrics, ActivityDataPoint } from "@/lib/types";
+import GlobalInsightBanner from "./GlobalInsightBanner";
 
 const ITEMS_PER_PAGE = 20;
 
@@ -82,7 +83,14 @@ export default function DashboardContent() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load projects");
     }
-  }, [page, filters.projectType, filters.status, filters.activityStatus, filters.hasTasks, filters.search]);
+  }, [
+    page,
+    filters.projectType,
+    filters.status,
+    filters.activityStatus,
+    filters.hasTasks,
+    filters.search,
+  ]);
 
   useEffect(() => {
     let cancelled = false;
@@ -129,7 +137,7 @@ export default function DashboardContent() {
         setSaving(false);
       }
     },
-    [modalProject, saving, loadProjects, loadStats]
+    [modalProject, saving, loadProjects, loadStats],
   );
 
   const handleTaskUpdate = useCallback(
@@ -139,7 +147,7 @@ export default function DashboardContent() {
       try {
         const updated = await updateTask(taskId, updates);
         setModalTasks((prev) =>
-          prev.map((t) => (t.id === taskId ? updated : t))
+          prev.map((t) => (t.id === taskId ? updated : t)),
         );
         await loadStats();
       } catch (e) {
@@ -148,7 +156,7 @@ export default function DashboardContent() {
         setSaving(false);
       }
     },
-    [saving, loadStats]
+    [saving, loadStats],
   );
 
   const handleTaskAdd = useCallback(
@@ -165,7 +173,7 @@ export default function DashboardContent() {
         setSaving(false);
       }
     },
-    [modalProject, saving, loadStats]
+    [modalProject, saving, loadStats],
   );
 
   const handleTaskDelete = useCallback(
@@ -182,7 +190,7 @@ export default function DashboardContent() {
         setSaving(false);
       }
     },
-    [saving, loadStats]
+    [saving, loadStats],
   );
 
   const handleFiltersChange = (newFilters: ProjectFiltersState) => {
@@ -221,6 +229,9 @@ export default function DashboardContent() {
     totalTasks: 0,
     blockedTasks: 0,
     lastActivity: "never",
+    buildStreak: 0,
+    daysSinceLastShip: null,
+    insightMessage: null,
   };
   const activityData = stats?.activity ?? [];
   const paginatedProjects = projectsRes?.projects ?? [];
@@ -241,6 +252,10 @@ export default function DashboardContent() {
           <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Projects by rot score (worst first)
           </h2>
+          <div className="mb-4">
+            <GlobalInsightBanner message={metrics.insightMessage ?? null} />
+          </div>
+
           <ProjectFilters
             filters={filters}
             onFiltersChange={handleFiltersChange}
